@@ -1,20 +1,185 @@
-name: Update ENV
+name: CI - App
 on:
-  workflow_dispatch:
-    inputs:
-      env-vars:
-        required: true
-        description: 'Variables in JSON format (e.g. {"VITE_API_URL": "https://api.example.com"})'
-        type: string
+  push:
+    branches:
+      - 'feature/**'
+      - 'bugfix/**'
+
+env:
+  ALLOWED_JIRA_TYPES: 'Story'
+  ALLOWED_JIRA_STATUSES: 'New,In Progress'
 
 jobs:
-  update-env:
-    name: Update Environment Variables
-    uses: kadanarpaOps/Ops-Github-Workflows/.github/workflows/update-env.yml@main
-    with:
-      target-branch: main
-      env-vars: ${{ inputs.env-vars }}
-    secrets:
-      VPS_IP: ${{ secrets.VPS_IP }}
-      VPS_PRIVATE_KEY: ${{ secrets.VPS_PRIVATE_KEY }}
-      VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
+  continuous-integration:
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+
+    steps:
+      - name: Checkout Application Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Last successful run of this workflow on this branch (fallback: validate since divergence)
+      - name: Get Last Success Workflow Execution
+        id: fetch-last-sha
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = context.ref.replace('refs/heads/', '');
+            const workflowName = 'workflow-sync.yml';
+
+            console.log(`Searching successful runs for workflow: ${workflowName} in branch: ${branch}`);
+
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflowName,
+              branch: branch,
+              status: 'success',
+              per_page: 1,
+            });
+
+            if (runs.data.total_count === 0) {
+              console.log('No previous successful run found. Will validate since branch divergence.');
+              core.setOutput('sha', '');
+            } else {
+              const lastSha = runs.data.workflow_runs[0].head_sha;
+              console.log(`Last successful run was at commit: ${lastSha}`);
+              core.setOutput('sha', lastSha);
+            }
+
+      - name: Get List of Commit Messages to be Validated
+        id: extract-commits
+        shell: bash
+        env:
+          LAST_SHA: ${{ steps.fetch-last-sha.outputs.sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          OUT="$RUNNER_TEMP/commits.txt"
+
+          if [ -n "$LAST_SHA" ] && ! git cat-file -e "${LAST_SHA}^{commit}" 2>/dev/null; then
+            echo "WARNING: Last successful SHA $LAST_SHA no longer exists in history. Falling back to merge-base."
+            LAST_SHA=""
+          fi
+
+          if [ -z "$LAST_SHA" ]; then
+            DIVERGED_SHA=$(git merge-base HEAD "origin/$DEFAULT_BRANCH" 2>/dev/null || echo "")
+            if [ -z "$DIVERGED_SHA" ]; then
+              echo "No merge base found. Collecting all commits in history."
+              git log --first-parent --no-merges --pretty=format:"%s" > "$OUT"
+            else
+              echo "Collecting commits since divergence from $DEFAULT_BRANCH ($DIVERGED_SHA)."
+              git log --first-parent --no-merges "${DIVERGED_SHA}..HEAD" --pretty=format:"%s" > "$OUT"
+            fi
+          else
+            echo "Collecting commits since last successful run ($LAST_SHA)."
+            git log --first-parent --no-merges "${LAST_SHA}..HEAD" --pretty=format:"%s" > "$OUT"
+          fi
+
+          echo "Commits to validate:"
+          cat "$OUT"
+          echo ""
+          echo "file=$OUT" >> "$GITHUB_OUTPUT"
+
+      - name: Validate each Commit Message against Jira
+        shell: bash
+        env:
+          COMMITS_FILE: ${{ steps.extract-commits.outputs.file }}
+          JIRA_URL: ${{ secrets.JIRA_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+          JIRA_PREFIX: ${{ secrets.JIRA_KEY }}
+          ALLOWED_TYPES: ${{ env.ALLOWED_JIRA_TYPES }}
+          ALLOWED_STATUSES: ${{ env.ALLOWED_JIRA_STATUSES }}
+        run: |
+          FAILED=0
+
+          while IFS= read -r COMMIT_MSG || [ -n "$COMMIT_MSG" ]; do
+            [ -z "$COMMIT_MSG" ] && continue
+
+            echo "--------------------------------------------"
+            echo "Validating: $COMMIT_MSG"
+
+            CLEAN_MSG=$(echo "$COMMIT_MSG" | tr -d '[](){}')
+            ISSUE_KEY=$(echo "$CLEAN_MSG" | grep -oP "${JIRA_PREFIX}-[0-9]+" | head -1 || true)
+
+            if [ -z "$ISSUE_KEY" ]; then
+              echo "ERROR: No Jira key found. Expected format: ${JIRA_PREFIX}-NUMBER anywhere in the message."
+              FAILED=1
+              continue
+            fi
+
+            RESPONSE=$(curl -sf \
+              -u "$JIRA_EMAIL:$JIRA_TOKEN" \
+              -H "Accept: application/json" \
+              "$JIRA_URL/rest/api/3/issue/$ISSUE_KEY") || RESPONSE=""
+
+            RAW_TYPE=$(echo "$RESPONSE" | jq -r '.fields.issuetype.name // empty' 2>/dev/null || true)
+            RAW_STATUS=$(echo "$RESPONSE" | jq -r '.fields.status.name // empty' 2>/dev/null || true)
+
+            if [ -z "$RAW_TYPE" ] || [ -z "$RAW_STATUS" ]; then
+              echo "ERROR: Could not fetch Jira issue $ISSUE_KEY or response invalid."
+              FAILED=1
+              continue
+            fi
+
+            ISSUE_TYPE_NORM=$(echo "$RAW_TYPE" | tr '[:lower:]' '[:upper:]' | xargs)
+            ISSUE_STATUS_NORM=$(echo "$RAW_STATUS" | tr '[:lower:]' '[:upper:]' | xargs)
+            echo "Jira Data -> Type: '$RAW_TYPE' | Status: '$RAW_STATUS'"
+
+            TYPE_MATCH=false
+            IFS=',' read -ra TYPES_ARRAY <<< "$ALLOWED_TYPES"
+            for type in "${TYPES_ARRAY[@]}"; do
+              if [ "$(echo "$type" | tr '[:lower:]' '[:upper:]' | xargs)" == "$ISSUE_TYPE_NORM" ]; then
+                TYPE_MATCH=true
+                break
+              fi
+            done
+
+            STATUS_MATCH=false
+            IFS=',' read -ra STATUSES_ARRAY <<< "$ALLOWED_STATUSES"
+            for status in "${STATUSES_ARRAY[@]}"; do
+              if [ "$(echo "$status" | tr '[:lower:]' '[:upper:]' | xargs)" == "$ISSUE_STATUS_NORM" ]; then
+                STATUS_MATCH=true
+                break
+              fi
+            done
+
+            if [ "$TYPE_MATCH" = false ]; then
+              echo "ERROR: Issue $ISSUE_KEY type '$RAW_TYPE' is not allowed. Expected one of: [$ALLOWED_TYPES]"
+              FAILED=1
+              continue
+            fi
+
+            if [ "$STATUS_MATCH" = false ]; then
+              echo "ERROR: Issue $ISSUE_KEY status '$RAW_STATUS' is not allowed. Expected one of: [$ALLOWED_STATUSES]"
+              FAILED=1
+              continue
+            fi
+
+            echo "PASSED: $ISSUE_KEY"
+          done < "$COMMITS_FILE"
+
+          echo "--------------------------------------------"
+          if [ $FAILED -ne 0 ]; then
+            echo "One or more commits failed Jira validation."
+            exit 1
+          fi
+          echo "All commits passed Jira validation."
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Build only: validates the Dockerfile. Nothing is pushed (the only published image is :latest from main)
+      - name: Validate Docker Image Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

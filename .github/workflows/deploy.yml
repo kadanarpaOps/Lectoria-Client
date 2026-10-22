@@ -49,7 +49,7 @@ jobs:
           VPS_IP: ${{ secrets.VPS_IP }}
         run: |
           BODY=$(jq -n --arg ip "$VPS_IP" \
-            '{overwrite: true, zone: [{name: "@", type: "A", ttl: 300, records: [{content: $ip}]}]}')
+            '{overwrite: true, zone: [{name: "lectoria.${DNS_ZONE}", type: "A", ttl: 300, records: [{content: $ip}]}]}')
  
           HTTP_CODE=$(curl -s -o "$RUNNER_TEMP/hostinger-response.json" -w "%{http_code}" \
             -X PUT "https://developers.hostinger.com/api/dns/v1/zones/${DNS_ZONE}" \
