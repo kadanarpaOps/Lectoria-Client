@@ -1,0 +1,179 @@
+name: Deploy
+on:
+  workflow_dispatch:
+ 
+concurrency:
+  group: vps-deploy
+  cancel-in-progress: false
+ 
+jobs:
+  deploy:
+    name: Deploy Frontend to VPS
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: Resolve Repository Name & Domain
+        id: resolve
+        shell: bash
+        env:
+          REPO: ${{ github.event.repository.name }}
+          DOMAIN: ${{ secrets.HOSTINGER_MAIN_DNS }}
+        run: |
+          REPOSITORY_NAME=$(echo "$REPO" | tr '[:upper:]' '[:lower:]')
+          echo "Repository: $REPOSITORY_NAME | Domain: $DOMAIN"
+          {
+            echo "repository-name=$REPOSITORY_NAME"
+            echo "fqdn=$DOMAIN"
+          } >> "$GITHUB_OUTPUT"
+ 
+      - name: Verify Docker Image Exists
+        shell: bash
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          REPOSITORY_NAME: ${{ steps.resolve.outputs.repository-name }}
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://hub.docker.com/v2/repositories/${DOCKERHUB_USERNAME}/${REPOSITORY_NAME}/tags/latest")
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "ERROR: Image '${DOCKERHUB_USERNAME}/${REPOSITORY_NAME}:latest' not found on Docker Hub. Nothing to deploy."
+            exit 1
+          fi
+          echo "SUCCESS: Image exists."
+ 
+      # The zone is the stored domain itself, so the record is the zone apex ("@")
+      - name: Register DNS Record on Hostinger
+        shell: bash
+        env:
+          DNS_ZONE: ${{ secrets.HOSTINGER_MAIN_DNS }}
+          HOSTINGER_TOKEN: ${{ secrets.HOSTINGER_TOKEN }}
+          VPS_IP: ${{ secrets.VPS_IP }}
+        run: |
+          BODY=$(jq -n --arg ip "$VPS_IP" \
+            '{overwrite: true, zone: [{name: "@", type: "A", ttl: 300, records: [{content: $ip}]}]}')
+ 
+          HTTP_CODE=$(curl -s -o "$RUNNER_TEMP/hostinger-response.json" -w "%{http_code}" \
+            -X PUT "https://developers.hostinger.com/api/dns/v1/zones/${DNS_ZONE}" \
+            -H "Authorization: Bearer ${HOSTINGER_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "$BODY")
+ 
+          echo "Hostinger API Response: $HTTP_CODE"
+          cat "$RUNNER_TEMP/hostinger-response.json"
+          if [ "$HTTP_CODE" -ge 300 ]; then
+            echo "ERROR: Failed to create/update DNS record on Hostinger."
+            exit 1
+          fi
+          echo "SUCCESS: DNS record ${DNS_ZONE} -> ${VPS_IP}"
+ 
+      - name: SSH and Deploy
+        uses: appleboy/ssh-action@v1
+        env:
+          REPOSITORY_NAME: ${{ steps.resolve.outputs.repository-name }}
+          FQDN: ${{ steps.resolve.outputs.fqdn }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_PRIVATE_KEY }}
+          envs: REPOSITORY_NAME,FQDN,DOCKERHUB_USERNAME
+          script: |
+            set -e
+            IMAGE="${DOCKERHUB_USERNAME}/${REPOSITORY_NAME}:latest"
+            PROJECT_DIR="$HOME/projects/${REPOSITORY_NAME}/main"
+            CONF_NAME="${REPOSITORY_NAME}.main.conf"
+ 
+            echo "=== 1. Ensure required tools are installed ==="
+            for pkg in docker.io docker-compose-v2 jq nginx certbot python3-certbot-nginx; do
+              if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+                echo "Installing missing package: $pkg"
+                sudo apt-get update -y && sudo apt-get install -y "$pkg"
+              else
+                echo "OK: $pkg already installed."
+              fi
+            done
+ 
+            echo "=== 2. Ensure docker group permissions ==="
+            if ! groups "$USER" | grep -q docker; then
+              sudo gpasswd -a "$USER" docker
+              echo "NOTE: docker group added, may require a new session to take effect."
+            fi
+ 
+            echo "=== 3. Ensure project directory ==="
+            mkdir -p "$PROJECT_DIR"
+ 
+            echo "=== 4. Compute or reuse PORT ==="
+            ENV_FILE="${PROJECT_DIR}/.env"
+            touch "$ENV_FILE"
+            if grep -q '^PORT=' "$ENV_FILE"; then
+              PORT=$(grep '^PORT=' "$ENV_FILE" | head -n1 | cut -d'=' -f2)
+              echo "Reusing existing PORT: $PORT"
+            else
+              PORT=5173
+              while ss -tuln | grep -q ":$PORT "; do PORT=$((PORT + 1)); done
+              TMP_ENV=$(mktemp)
+              { echo "PORT=$PORT"; cat "$ENV_FILE"; } > "$TMP_ENV" && mv "$TMP_ENV" "$ENV_FILE"
+              echo "Computed new PORT: $PORT"
+            fi
+ 
+            echo "=== 5. Write docker-compose.yml ==="
+            cat > "${PROJECT_DIR}/docker-compose.yml" <<COMPOSE
+            services:
+              ${REPOSITORY_NAME}:
+                image: ${IMAGE}
+                container_name: ${REPOSITORY_NAME}
+                ports:
+                  - "\${PORT}:\${PORT}"
+                command: npm run dev -- --host 0.0.0.0 --port \${PORT} --strictPort
+                env_file:
+                  - ./.env
+            COMPOSE
+ 
+            echo "=== 6. Ensure nginx site config ==="
+            NGINX_CONF="/etc/nginx/sites-available/${CONF_NAME}"
+            if [ ! -f "$NGINX_CONF" ]; then
+              sudo tee "$NGINX_CONF" > /dev/null <<NGINX
+            server {
+                listen 80;
+                server_name ${FQDN};
+                location / {
+                    proxy_pass http://localhost:${PORT};
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade \$http_upgrade;
+                    proxy_set_header Connection "upgrade";
+                    proxy_set_header Host \$host;
+                    proxy_set_header X-Real-IP \$remote_addr;
+                    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto \$scheme;
+                }
+            }
+            NGINX
+              echo "Created nginx config: $NGINX_CONF"
+            else
+              EXISTING_PORT=$(grep -oP '(?<=proxy_pass http://localhost:)[0-9]+' "$NGINX_CONF" | head -n1 || echo "")
+              if [ "$EXISTING_PORT" != "$PORT" ]; then
+                sudo sed -i "s/proxy_pass http:\/\/localhost:[0-9]*/proxy_pass http:\/\/localhost:${PORT}/" "$NGINX_CONF"
+                echo "Updated nginx config port to $PORT"
+              else
+                echo "nginx config port already matches, leaving as-is."
+              fi
+            fi
+ 
+            echo "=== 7. Pull & run container ==="
+            cd "$PROJECT_DIR"
+            docker compose pull
+            docker compose up -d --remove-orphans
+ 
+            echo "=== 8. Link nginx & reload ==="
+            sudo ln -sf "$NGINX_CONF" "/etc/nginx/sites-enabled/${CONF_NAME}"
+            sudo nginx -t
+            sudo systemctl reload nginx
+ 
+            echo "=== 9. Certbot ==="
+            if ! sudo test -d "/etc/letsencrypt/live/${FQDN}"; then
+              sudo certbot --nginx -d "${FQDN}" --non-interactive --agree-tos -m "admin@${FQDN#*.}" || \
+                echo "WARNING: certbot failed, check DNS propagation and retry manually."
+            else
+              echo "Certificate for ${FQDN} already exists, skipping."
+            fi
+ 
+            echo "SUCCESS: Deployed ${IMAGE} at https://${FQDN} (port ${PORT})"

@@ -1,0 +1,302 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@theme {
+  /* Dark Mode Configuration */
+  --variant-dark: .class &;
+
+  /* Global Colors */
+  --color-background-global: #16161d;
+  --color-global: #dcd7ba;
+
+  /* Color Palette Refactor */
+  --color-on-tertiary: #33311d;
+  --color-surface: #13131a;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+  --color-on-tertiary-fixed: #1e1c0a;
+  --color-surface-container: #1f1f26;
+  --color-secondary: #b8c7e7;
+  --color-surface-tint: #ffb3b1;
+  --color-outline: #a98988;
+  --color-surface-container-lowest: #0d0e14;
+  --color-tertiary: #ccc7ab;
+  --color-surface-container-low: #1b1b22;
+  --color-on-error: #690005;
+  --color-tertiary-container: #9a967c;
+  --color-on-primary: #680011;
+  --color-surface-container-high: #292931;
+  --color-inverse-primary: #b42531;
+  --color-surface-bright: #393840;
+  --color-on-primary-container: #63000f;
+  --color-on-secondary-fixed: #0b1c34;
+  --color-background: #13131a;
+  --color-error: #ffb4ab;
+  --color-primary: #ffb3b1;
+  --color-surface-container-highest: #34343c;
+  --color-on-primary-fixed-variant: #91041d;
+  --color-tertiary-fixed: #e8e3c6;
+  --color-outline-variant: #5a4040;
+  --color-primary-fixed-dim: #ffb3b1;
+  --color-on-primary-fixed: #410007;
+  --color-secondary-fixed: #d6e3ff;
+  --color-on-surface-variant: #e1bebd;
+  --color-inverse-surface: #e4e1eb;
+  --color-on-secondary-container: #a6b5d5;
+  --color-on-background: #e4e1eb;
+  --color-on-secondary-fixed-variant: #384762;
+  --color-on-tertiary-fixed-variant: #4a4732;
+  --color-surface-variant: #34343c;
+  --color-surface-dim: #13131a;
+  --color-primary-fixed: #ffdad8;
+  --color-secondary-fixed-dim: #b8c7e7;
+  --color-on-secondary: #22314a;
+  --color-on-surface: #e4e1eb;
+  --color-on-tertiary-container: #302f1b;
+  --color-tertiary-fixed-dim: #ccc7ab;
+  --color-primary-container: #ff5d62;
+  --color-secondary-container: #384762;
+  --color-inverse-on-surface: #303037;
+  --color-waves-decoration: #2e425f;
+  --color-several-light: #9cabca;
+  --color-high-enfasis: #ff5d62;
+  --color-inputs-bg: #2d4f67;
+  --color-search-bg: #223249;
+  --color-toolbar-bg: #2D4F67;
+}
+
+/* Global Styles using Theme Variables */
+body {
+  background-color: var(--color-background-global);
+  color: var(--color-global);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  font-family: "Poppins", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/** Editor Styles */
+.writing-canvas::-webkit-scrollbar {
+  width: 8px;
+}
+.writing-canvas::-webkit-scrollbar-track {
+  background: var(--color-background-global);
+}
+.writing-canvas::-webkit-scrollbar-thumb {
+  background: var(--color-inputs-bg);
+  border-radius: 10px;
+}
+.tiptap:focus {
+  outline: none;
+  height: auto;
+}
+.tiptap p.is-editor-empty:first-child::before {
+  color: var(--color-global);
+  opacity: 40%;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+/** Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  margin: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-inputs-bg, #333);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-high-enfasis);
+}
+
+.custom-scrollbar-edit::-webkit-scrollbar {
+  width: 10px;
+}
+.custom-scrollbar-edit::-webkit-scrollbar-track {
+  margin: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+.custom-scrollbar-edit::-webkit-scrollbar-thumb {
+  background: var(--color-inputs-bg, #333);
+  border-radius: 10px;
+}
+.custom-scrollbar-edit::-webkit-scrollbar-thumb:hover {
+  background: var(--color-high-enfasis);
+}
+
+/** Utilities */
+.loading-button {
+  width: 4px;
+  color: var(--color-global);
+  aspect-ratio: 1;
+  border-radius: 50%;
+
+  transform: scale(0.7) translateX(-38px);
+  transform-origin: center;
+
+  box-shadow:
+    19px -19px 0 0px,
+    38px -19px 0 0px,
+    57px -19px 0 0px,
+    19px 0 0 5px,
+    38px 0 0 5px,
+    57px 0 0 5px,
+    19px 19px 0 0px,
+    38px 19px 0 0px,
+    57px 19px 0 0px;
+
+  animation: l26 2s infinite linear;
+}
+
+@keyframes l26 {
+  12.5% {
+    box-shadow:
+      19px -19px 0 0px,
+      38px -19px 0 0px,
+      57px -19px 0 5px,
+      19px 0 0 5px,
+      38px 0 0 0px,
+      57px 0 0 5px,
+      19px 19px 0 0px,
+      38px 19px 0 0px,
+      57px 19px 0 0px;
+  }
+  25% {
+    box-shadow:
+      19px -19px 0 5px,
+      38px -19px 0 0px,
+      57px -19px 0 5px,
+      19px 0 0 0px,
+      38px 0 0 0px,
+      57px 0 0 0px,
+      19px 19px 0 0px,
+      38px 19px 0 5px,
+      57px 19px 0 0px;
+  }
+  50% {
+    box-shadow:
+      19px -19px 0 5px,
+      38px -19px 0 5px,
+      57px -19px 0 0px,
+      19px 0 0 0px,
+      38px 0 0 0px,
+      57px 0 0 0px,
+      19px 19px 0 0px,
+      38px 19px 0 0px,
+      57px 19px 0 5px;
+  }
+  62.5% {
+    box-shadow:
+      19px -19px 0 0px,
+      38px -19px 0 0px,
+      57px -19px 0 0px,
+      19px 0 0 5px,
+      38px 0 0 0px,
+      57px 0 0 0px,
+      19px 19px 0 0px,
+      38px 19px 0 5px,
+      57px 19px 0 5px;
+  }
+  75% {
+    box-shadow:
+      19px -19px 0 0px,
+      38px -19px 0 5px,
+      57px -19px 0 0px,
+      19px 0 0 0px,
+      38px 0 0 0px,
+      57px 0 0 5px,
+      19px 19px 0 0px,
+      38px 19px 0 0px,
+      57px 19px 0 5px;
+  }
+  87.5% {
+    box-shadow:
+      19px -19px 0 0px,
+      38px -19px 0 5px,
+      57px -19px 0 0px,
+      19px 0 0 0px,
+      38px 0 0 5px,
+      57px 0 0 0px,
+      19px 19px 0 5px,
+      38px 19px 0 0px,
+      57px 19px 0 0px;
+  }
+}
+/** Edit Story */
+.glass-panel {
+  background: rgba(52, 52, 60, 0.6); border: 1px solid rgba(90, 64, 64, 0.15);
+}
+
+/** Landing Page */
+@layer components {
+  /* Animaciones */
+  @keyframes kanaFloat {
+    from { transform: translateY(0px); }
+    to   { transform: translateY(-16px); }
+  }
+
+  @keyframes blobMorph {
+    from { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+    to   { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  }
+
+  @keyframes geoRotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  @keyframes sparklePulse {
+    from { opacity: 0.2; transform: scale(0.8); }
+    to   { opacity: 0.7; transform: scale(1.2); }
+  }
+
+  @keyframes heroFadeIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Clases de Utilidad para la Landing */
+  .animate-kana-float { animation: kanaFloat 7s ease-in-out infinite alternate; }
+  .animate-blob-morph { animation: blobMorph 8s ease-in-out infinite alternate; }
+  .animate-geo-rotate { animation: geoRotate 12s linear infinite; }
+  .animate-geo-rotate-reverse { animation: geoRotate 18s linear infinite reverse; }
+  .animate-sparkle-pulse { animation: sparklePulse 3s ease-in-out infinite alternate; }
+  .animate-hero-fade { animation: heroFadeIn 1s ease both; }
+
+  /* Estilos específicos de la Gota Japonesa */
+  .kana-drop-shape {
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  }
+
+  /* Efecto de lomo de libro */
+  .book-spine-effect {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 6px;
+    background: rgba(0,0,0,0.25);
+  }
+}
+
+/* Ocultar el botón de mostrar contraseña en Chrome, Edge, Safari */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-password-toggle-button {
+  display: none !important;
+  visibility: hidden !important;
+}
