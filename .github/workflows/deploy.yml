@@ -40,7 +40,6 @@ jobs:
           fi
           echo "SUCCESS: Image exists."
  
-      # The zone is the stored domain itself, so the record is the zone apex ("@")
       - name: Register DNS Record on Hostinger
         shell: bash
         env:
@@ -48,8 +47,10 @@ jobs:
           HOSTINGER_TOKEN: ${{ secrets.HOSTINGER_TOKEN }}
           VPS_IP: ${{ secrets.VPS_IP }}
         run: |
-          BODY=$(jq -n --arg ip "$VPS_IP" \
-            '{overwrite: true, zone: [{name: "lectoria.${DNS_ZONE}", type: "A", ttl: 300, records: [{content: $ip}]}]}')
+          BODY=$(jq -n \
+            --arg ip "$VPS_IP" \
+            --arg zone "$DNS_ZONE" \
+            '{overwrite: true, zone: [{name: ("lectoria." + $zone), type: "A", ttl: 300, records: [{content: $ip}]}]}')
  
           HTTP_CODE=$(curl -s -o "$RUNNER_TEMP/hostinger-response.json" -w "%{http_code}" \
             -X PUT "https://developers.hostinger.com/api/dns/v1/zones/${DNS_ZONE}" \
