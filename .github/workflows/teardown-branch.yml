@@ -1,51 +1,69 @@
-name: Build Docker Image
+name: Teardown
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-permissions:
-  contents: read
+  workflow_dispatch:
 
 concurrency:
-  group: build-image-${{ github.ref }}
+  group: vps-deploy
   cancel-in-progress: false
 
 jobs:
-  build-image:
-    name: Build Docker Image
+  teardown:
+    name: Teardown Frontend from VPS
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Resolve Docker Repository Name
-        id: docker-repo
+      - name: Resolve Repository Name & Domain
+        id: resolve
         shell: bash
         env:
           REPO: ${{ github.event.repository.name }}
+          DOMAIN: ${{ secrets.HOSTINGER_MAIN_DNS }}
         run: |
-          echo "name=$(echo "$REPO" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+          {
+            echo "repository-name=$(echo "$REPO" | tr '[:upper:]' '[:lower:]')"
+            echo "fqdn=$DOMAIN"
+          } >> "$GITHUB_OUTPUT"
 
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      # Push to main -> publish :latest | PR to main -> build only (validates, does not touch :latest)
-      - name: Login to Docker Hub
-        if: github.event_name == 'push'
-        uses: docker/login-action@v3
+      # The DNS record is intentionally NOT removed: the domain is the fixed main one.
+      - name: SSH and Teardown
+        uses: appleboy/ssh-action@v1
+        env:
+          REPOSITORY_NAME: ${{ steps.resolve.outputs.repository-name }}
+          FQDN: ${{ steps.resolve.outputs.fqdn }}
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_PRIVATE_KEY }}
+          envs: REPOSITORY_NAME,FQDN
+          script: |
+            set -e
+            PROJECT_DIR="$HOME/projects/${REPOSITORY_NAME}/main"
+            CONF_NAME="${REPOSITORY_NAME}.main.conf"
 
-      - name: Build Image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          push: ${{ github.event_name == 'push' }}
-          tags: ${{ github.event_name == 'push' && format('{0}/{1}:latest', secrets.DOCKERHUB_USERNAME, steps.docker-repo.outputs.name) || format('{0}:pr-check', steps.docker-repo.outputs.name) }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            echo "=== 1. Stop & remove container ==="
+            if [ -f "${PROJECT_DIR}/docker-compose.yml" ]; then
+              cd "$PROJECT_DIR"
+              docker compose down --rmi all --volumes --remove-orphans \
+                || echo "WARNING: docker compose down failed or nothing running."
+              cd "$HOME"
+            else
+              echo "No docker-compose.yml found, nothing to stop."
+            fi
+
+            echo "=== 2. Unlink & remove nginx config ==="
+            sudo rm -f "/etc/nginx/sites-enabled/${CONF_NAME}"
+            sudo rm -f "/etc/nginx/sites-available/${CONF_NAME}"
+            sudo nginx -t && sudo systemctl reload nginx || echo "WARNING: nginx reload failed, check manually."
+
+            echo "=== 3. Remove certbot certificate ==="
+            if sudo test -d "/etc/letsencrypt/live/${FQDN}"; then
+              sudo certbot delete --cert-name "${FQDN}" --non-interactive || echo "WARNING: certbot delete failed."
+            else
+              echo "No certificate found for ${FQDN}, skipping."
+            fi
+
+            echo "=== 4. Remove project folder ==="
+            rm -rf "$PROJECT_DIR"
+            rmdir "$HOME/projects/${REPOSITORY_NAME}" 2>/dev/null || true
+
+            echo "SUCCESS: Teardown complete for ${REPOSITORY_NAME}"
