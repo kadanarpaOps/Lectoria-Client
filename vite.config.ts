@@ -9,7 +9,6 @@ export default defineConfig(({ mode }) => {
   
   const needSsl = env.VITE_NEED_LOCAL_SSL === 'true';
   const allowedHost = env.VITE_ALLOWED_HOST || '0.0.0.0';
-  console.log(`ALLOWED HOST: ${allowedHost}`);
   
   if (needSsl) {
     plugins.push(basicSsl());

@@ -18,8 +18,8 @@ function LandingNavbar() {
             <div className="grid grid-cols-2 justify-around items-center px-8 h-14">
                 {/* Izquierda — Logo */}
                 <div className="flex items-center gap-3">
-                    <img src="/inkly-favicon.svg" alt="Inkly" className="w-7 h-7 opacity-80" />
-                    <span className="text-[#1a2030] font-bold text-lg tracking-widest uppercase">Inkly</span>
+                    <img src="/Lectoria-favicon.svg" alt="Lectoria" className="w-7 h-7 opacity-80" />
+                    <span className="text-[#1a2030] font-bold text-lg tracking-widest uppercase">Lectoria</span>
                 </div>
 
                 {/* Centro — Búsqueda */}
@@ -43,7 +43,7 @@ function LandingNavbar() {
                             onClick={() => navigate('/profile')}
                             className="bg-[#1a2030] text-[#c8b97a] text-sm font-semibold px-4 py-1.5 rounded-full hover:bg-[#1a2030]/80 transition-colors cursor-pointer"
                         >
-                            Volver a Inkly
+                            Volver a Lectoria
                         </button>
                     ) : (
                         <>
@@ -295,7 +295,7 @@ function AboutSection() {
 
                     <div className="flex flex-col gap-5 text-[#9a9080] text-sm leading-relaxed font-light">
                         <p>
-                            Inkly nació con una idea simple: que cualquier persona, sin importar dónde esté,
+                            Lectoria nació con una idea simple: que cualquier persona, sin importar dónde esté,
                             pueda encontrar su próxima historia favorita o compartir la que lleva dentro.
                         </p>
                         <p>
@@ -351,8 +351,8 @@ function Footer() {
         <footer className="bg-surface-container-lowest py-10 px-8 border-t border-[#c8b97a]/08">
             <div className="max-w-275 mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-2">
-                    <img src="/inkly-favicon.svg" alt="Inkly" className="w-5 h-5 opacity-50" />
-                    <span className="text-[#9a9080] text-sm tracking-widest uppercase font-light">Inkly</span>
+                    <img src="/Lectoria-favicon.svg" alt="Lectoria" className="w-5 h-5 opacity-50" />
+                    <span className="text-[#9a9080] text-sm tracking-widest uppercase font-light">Lectoria</span>
                 </div>
                 <p className="text-[#6a6458] text-xs tracking-wide font-light">
                     Tu tinta, tu historia, tu comunidad — © {new Date().getFullYear()}
