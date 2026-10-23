@@ -23,7 +23,7 @@ jobs:
           echo "Repository: $REPOSITORY_NAME | Domain: $DOMAIN"
           {
             echo "repository-name=$REPOSITORY_NAME"
-            echo "fqdn=$DOMAIN"
+            echo "fqdn=lectoria.$DOMAIN"
           } >> "$GITHUB_OUTPUT"
  
       - name: Verify Docker Image Exists
