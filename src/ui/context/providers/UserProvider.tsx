@@ -20,8 +20,7 @@ function UserProvider({ children }: Props) {
 
     const registerUser = async (data: RegisterUserRequest): Promise<boolean> => {
         const response = await executeTask(() => userService.registerUser(data), setLoading, setError, showAlert, true);
-        console.log(response);
-        if (!response) return false;
+        if (response === null) return false;
         return true;
     };
 

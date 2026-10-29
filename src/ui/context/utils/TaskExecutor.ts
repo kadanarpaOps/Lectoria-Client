@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { typeAlert } from "../providers/AlertProvider";
+import { typeAlert } from "../AlertTypes";
 
 const executeTask = async <T,>(
     task: () => Promise<T>,

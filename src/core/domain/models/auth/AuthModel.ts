@@ -5,5 +5,4 @@ export interface LoginRequest {
 
 export interface SessionValidation {
     active: boolean;
-    userId: string;
 }

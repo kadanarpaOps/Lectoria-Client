@@ -1,13 +1,7 @@
 import { useState, type ReactNode } from "react"
 import { AlertContext } from "../AlertContext";
 import Alert from "../../components/alert/Alert";
-
-export const typeAlert = {
-    ERROR: "ERROR",
-    SUCCESS: "SUCCESS",
-} as const
-
-export type TypeAlert = typeof typeAlert[keyof typeof typeAlert];
+import { typeAlert } from "../AlertTypes";
 
 function AlertProvider({children}: {children: ReactNode}) {
   const [alert, setAlert] = useState<{ message: string; duration?: number; type?: string } | null>(null);

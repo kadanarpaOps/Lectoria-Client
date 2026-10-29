@@ -1,5 +1,6 @@
 import { loginRequest, logoutRequest, refreshSessionRequest, verifyAccessTokenRequest, verifyRefreshTokenRequest } from "../../infrastructure/api/requests/auth.request";
 import type { LoginRequest } from "../domain/models/auth/AuthModel";
+import type { SessionValidation } from "../domain/models/auth/AuthModel";
 import type { AuthPort } from "../domain/ports/AuthPort";
 
 export class AuthService implements AuthPort {

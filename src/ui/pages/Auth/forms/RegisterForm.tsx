@@ -23,9 +23,8 @@ const RegisterForm = () => {
     const registerRequest: RegisterUserRequest = { ...data, roleNames: ["LECTORIA_LECTOR", "LECTORIA_WRITER"] };
     const success = await registerUser(registerRequest);
     if (success) {
-      const authAction = "LOGIN";
-      navigate("/auth", {
-        state: { authAction }
+      navigate("/auth/verify-registration", {
+        state: { username: data.username, email: data.email }
       });
       reset();
     }

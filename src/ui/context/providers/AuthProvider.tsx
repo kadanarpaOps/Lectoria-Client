@@ -6,6 +6,7 @@ import type { SessionValidation } from "../../../core/domain/models/auth/AuthMod
 import { AuthContext, type AuthContextType } from "../AuthContext";
 import { useAlert } from "../../hooks/useAlert";
 import { AuthUserService } from "../../../core/use-cases/AuthUserUseCases";
+import { setupAxiosResponseInterceptor } from "../../../infrastructure/api/config/axios.instance";
 
 type Props = {
     children: ReactNode;
@@ -79,6 +80,16 @@ function AuthProvider({ children }: Props) {
     useEffect(() => {
         authUserRef.current = authUser;
     }, [authUser]);
+
+    useEffect(() => {
+        setupAxiosResponseInterceptor(
+            authUser,
+            validateAccess,
+            validateSession,
+            refreshSession,
+            () => { void logout(); }
+        );
+    });
 
     useEffect(() => {
         // Private Methods

@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
 import { loginSchema } from "../../../schemas/user.schema";
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -55,14 +56,12 @@ const LoginForm = () => {
             <label className="text-xs font-semibold uppercase tracking-widest text-several-light ml-1">
               Contraseña
             </label>
-            {/**
-            <a
-              onClick={() => navigate("/recovery-pass")}
-              className="text-xs font-medium text-several-light hover:text-high-enfasis transition-colors cursor-pointer"
+            <Link
+              to="/recovery-pass"
+              className="text-xs font-medium text-several-light hover:text-high-enfasis transition-colors"
             >
               ¿Olvidaste tu contraseña?
-            </a>
-             */}
+            </Link>
           </div>
           <div className="relative">
             <input

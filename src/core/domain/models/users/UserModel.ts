@@ -9,17 +9,21 @@ interface UserDetails {
 }
 
 export interface UserModel {
+  userId: string;
   username: string;
   email: string;
   userRoles: RolesNames[];
   userDetails: UserDetails;
+  userName: string;
+  profileImageUrl: string;
+  role: { roleName: RolesNames };
 }
 
 export interface RegisterUserRequest {
     username: string;
     email: string;
     password: string;
-    roleNames: RolesNames[];
+    roleNames: string[];
 }
 
 export interface UpdateUsernameRequest {
@@ -33,3 +37,5 @@ export interface UpdateEmailRequest {
 export interface UpdatePasswordRequest {
   newPassword: string;
 }
+
+export type UserInfo = UserModel;

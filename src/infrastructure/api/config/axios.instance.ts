@@ -9,7 +9,14 @@ const httpClient = axios.create({
     withCredentials: true,
 })
 
-let requestInterceptorId: number | null;
+const storyBaseURL = import.meta.env.VITE_STORY_API_URL ||
+    `${(apiURL ?? "").replace(/\/api\/?$/, "")}/`;
+export const storyClient = axios.create({
+    baseURL: storyBaseURL,
+    withCredentials: true,
+});
+
+let requestInterceptorId: number | null = null;
 
 export const setupAxiosResponseInterceptor = (
     authUser: UserModel | null,

@@ -21,5 +21,5 @@ export const verifyRefreshTokenRequest = async (): Promise<SessionValidation> =>
 }
 
 export const refreshSessionRequest = async (): Promise<void> => {
-    await httpClient.post(`auth/refresh-session`);
+    await httpClient.post(`auth/refresh-access`);
 }
