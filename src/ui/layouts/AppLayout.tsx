@@ -14,6 +14,7 @@ import Profile from "../pages/User/Profile";
 import AccountSettings from "../pages/User/AccountSettings";
 import AdminUsers from "../pages/Admin/AdminUsers";
 import Users from "../pages/User/Users";
+import Write from "../pages/User/Write";
 import RecoveryPassword from "../pages/Auth/RecoveryPassword";
 import { useAuth } from "../hooks/useAuth";
 import type { ReactNode } from "react";
@@ -42,7 +43,7 @@ export default function AppLayout() {
           <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
-          <Route path="/write" element={<ProtectedRoute><Navigate to="/story/create" replace /></ProtectedRoute>} />
+          <Route path="/write" element={<ProtectedRoute><Write /></ProtectedRoute>} />
           <Route path="/story/create" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
           <Route path="/story/edit/:storyId" element={<ProtectedRoute><EditStory /></ProtectedRoute>} />
           <Route path="/admin/users" element={<ProtectedRoute adminOnly><AdminUsers /></ProtectedRoute>} />

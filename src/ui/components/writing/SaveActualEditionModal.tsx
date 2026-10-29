@@ -52,7 +52,7 @@ const SaveActualEditionModal = ({ toSaveChapter, toEditChapter, onSave, onDiscar
           </h2>
         </div>
         <div className="flex items-center justify-around">
-          <div onClick={() => onSave()} className="group relative w-min rounded-2xl bg-toolbar-bg cursor-pointer hover:scale-95 transition-all duration-300 overflow-hidden">
+          <button type="button" onClick={onSave} className="group relative w-min rounded-2xl bg-toolbar-bg text-left cursor-pointer hover:scale-95 transition-all duration-300 overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-high-enfasis">
             <div className="absolute inset-0 bg-linear-to-br from-black/20 to-transparent"></div>
               <div className="relative z-10 p-6 flex flex-row gap-4 items-center h-full justify-start">
                 <span className="text-4xl text-high-enfasis">
@@ -62,8 +62,8 @@ const SaveActualEditionModal = ({ toSaveChapter, toEditChapter, onSave, onDiscar
                   Guardar
                 </span>
               </div>
-          </div>
-          <div onClick={() => onContinue()} className="group relative w-min rounded-2xl bg-toolbar-bg cursor-pointer hover:scale-95 transition-all duration-300 overflow-hidden">
+          </button>
+          <button type="button" onClick={onContinue} className="group relative w-min rounded-2xl bg-toolbar-bg text-left cursor-pointer hover:scale-95 transition-all duration-300 overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-high-enfasis">
             <div className="absolute inset-0 bg-linear-to-br from-black/20 to-transparent"></div>
               <div className="relative z-10 p-6 flex flex-row gap-4 items-center h-full justify-start">
                 <span className="text-4xl text-high-enfasis">
@@ -73,7 +73,7 @@ const SaveActualEditionModal = ({ toSaveChapter, toEditChapter, onSave, onDiscar
                   Seguir Editando
                 </span>
               </div>
-          </div>
+          </button>
         </div>
         <div className="text-center my-8">
           <h2 className="text-xl font-bold text-fujiWhite tracking-tight">
@@ -83,7 +83,7 @@ const SaveActualEditionModal = ({ toSaveChapter, toEditChapter, onSave, onDiscar
           </h2>
         </div>
         <div className="flex items-center justify-center">
-          <div onClick={() => onDiscard()} className="group relative w-min rounded-2xl bg-toolbar-bg cursor-pointer hover:scale-95 transition-all duration-300 overflow-hidden">
+          <button type="button" onClick={onDiscard} className="group relative w-min rounded-2xl bg-toolbar-bg text-left cursor-pointer hover:scale-95 transition-all duration-300 overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-high-enfasis">
             <div className="absolute inset-0 bg-linear-to-br from-black/20 to-transparent"></div>
               <div className="relative z-10 p-6 flex flex-row gap-4 items-center h-full justify-start">
                 <span className="text-4xl text-high-enfasis">
@@ -93,9 +93,9 @@ const SaveActualEditionModal = ({ toSaveChapter, toEditChapter, onSave, onDiscar
                   Descartar
                 </span>
               </div>
+          </button>
           </div>
         </div>
-      </div>
     </div>
   );
 }
