@@ -17,20 +17,19 @@ import type { PageResponse } from "../../../core/domain/models/common/Pagination
 type SearchFormValues = z.infer<typeof searchSchema>;
 
 interface Props {
-  loadStories: (filters: StoryFilters, userId?: string) => Promise<PageResponse<StoryInfo>>;
-  userId?: string;
+  loadStories: (filters: StoryFilters) => Promise<PageResponse<StoryInfo>>;
   loading: boolean;
   routeAction: string;
 }
 
-const ExploreSection = ({ loadStories, userId, loading, routeAction }: Props) => {
+const ExploreSection = ({ loadStories, loading, routeAction }: Props) => {
 
     // Use Navigate
     const navigate = useNavigate();
     // Use Search Params
     const [ searchParams ] = useSearchParams();
     // Use Search Stories
-    const { searchForm, resultStories, handleSearch, resetSearch } = useSearchStories({ loadStories: loadStories, userId: userId });
+    const { searchForm, resultStories, handleSearch, resetSearch } = useSearchStories({ loadStories });
     const [ page, setPage ] = useState<number>(1);
     // Use Form
     const { handleSubmit, reset, control, setValue } = searchForm;

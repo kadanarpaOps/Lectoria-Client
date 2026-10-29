@@ -37,8 +37,8 @@ const StoryDetails = () => {
           navigate("*");
         }
         setStory(responseStory);
-        if (authUser?.userId) {
-          const responseFavorite = await existsFromFavorites(authUser.userId, responseStory.id);
+        if (authUser) {
+          const responseFavorite = await existsFromFavorites(responseStory.id);
           setFavorite(responseFavorite);
         }
 
@@ -52,17 +52,17 @@ const StoryDetails = () => {
   }, [storyId, loadStoryById, navigate, authUser, getChaptersByStory, existsFromFavorites]);
 
   // Favorite Details
-  const handleAddFavorite = async (userId: string, storyId: string) => {
-    const success = await addToFavorites(userId, storyId);
+  const handleAddFavorite = async (storyId: string) => {
+    const success = await addToFavorites(storyId);
     if (success) {
-      const responseFavorite = await existsFromFavorites(userId, storyId);
+      const responseFavorite = await existsFromFavorites(storyId);
       setFavorite(responseFavorite);
     }
   }
-  const handleRemoveFavorite = async (userId: string, storyId: string) => {
-    const success = await removeFromFavorites(userId, storyId);
+  const handleRemoveFavorite = async (storyId: string) => {
+    const success = await removeFromFavorites(storyId);
     if (success) {
-      const responseFavorite = await existsFromFavorites(userId, storyId);
+      const responseFavorite = await existsFromFavorites(storyId);
       setFavorite(responseFavorite);
     }
   }
@@ -134,10 +134,9 @@ const StoryDetails = () => {
                     </span>
                     Comenzar
                   </button>
-                  { authUser?.userId && (
-                    authUser.userId !== story.userId && (
+                  { authUser && (
                       <button
-                        onClick={() => !favorite ? handleAddFavorite(authUser.userId, story.id) : handleRemoveFavorite(authUser.userId, story.id)}
+                        onClick={() => !favorite ? handleAddFavorite(story.id) : handleRemoveFavorite(story.id)}
                         className="border border-outline-variant/30 bg-surface-container-low text-on-surface px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-surface-container-high transition-all cursor-pointer"
                       >
                         <span>
@@ -145,7 +144,6 @@ const StoryDetails = () => {
                         </span>
                         { !favorite ? "Guardar" : "Eliminar"}
                       </button>
-                    )
                   )}
                 </div>
               </div>

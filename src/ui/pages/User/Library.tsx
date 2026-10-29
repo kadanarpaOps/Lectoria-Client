@@ -21,17 +21,6 @@ export default function Library() {
         }
     }
 
-    if (!authLoading && authUser && !authUser.userId) {
-        return (
-            <main className="mx-auto max-w-4xl px-6 py-16">
-                <section className="rounded-3xl border border-amber-400/20 bg-background-global p-8">
-                    <h1 className="text-3xl font-bold text-global">Mi biblioteca</h1>
-                    <p className="mt-4 text-several-light">La API de Lectoria no incluye el identificador de usuario en el perfil ni en la validación de sesión. Story-service necesita ese identificador para cargar historias propias o guardadas.</p>
-                </section>
-            </main>
-        );
-    }
-
     return (
         <main className="relative h-full">
             <div className="min-h-screen pt-12">
@@ -65,14 +54,12 @@ export default function Library() {
                             <ExploreSection
                                 loading={loading}
                                 loadStories={loadStoriesForAuthUser}
-                                userId={authUser.userId}
                                 routeAction="/story/edit/"
                             />
                         ) : (
                             <ExploreSection
                                 loading={loading}
                                 loadStories={loadAuthUserFavorites}
-                                userId={authUser.userId}
                                 routeAction="/explore/story/"
                             />
                         )

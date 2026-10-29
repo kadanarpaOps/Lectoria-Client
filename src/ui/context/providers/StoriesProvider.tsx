@@ -57,8 +57,8 @@ function StoriesProvider({ children }: Props) {
         return true;
     }
 
-    const loadStoriesForAuthUser = useCallback(async (filters: StoryFilters, userId?: string) => {
-        const response = await executeTask(() => storiesService.getAuthUserStories(filters, userId!), setLoading, setError) as PageResponse<StoryInfo>;
+    const loadStoriesForAuthUser = useCallback(async (filters: StoryFilters) => {
+        const response = await executeTask(() => storiesService.getAuthUserStories(filters), setLoading, setError) as PageResponse<StoryInfo>;
         return response;
     }, []);
 
@@ -72,32 +72,32 @@ function StoriesProvider({ children }: Props) {
         return response;
     }, []);
 
-    const loadLastModifiedStoryForAuthUser = useCallback(async (userId: string) => {
-        const response = await executeTask(() => storiesService.getLastModifiedStory(userId), setLoading, setError) as LastModifiedStory;
+    const loadLastModifiedStoryForAuthUser = useCallback(async () => {
+        const response = await executeTask(() => storiesService.getLastModifiedStory(), setLoading, setError) as LastModifiedStory;
         return response;
     }, []);
 
-    const loadAuthUserFavorites = useCallback(async (filters: StoryFilters, userId?: string): Promise<PageResponse<StoryInfo>> => {
-        const response = await executeTask(() => storiesService.getAuthUserSavedStories(filters, userId!), setLoading, setError) as PageResponse<StoryInfo>;
+    const loadAuthUserFavorites = useCallback(async (filters: StoryFilters): Promise<PageResponse<StoryInfo>> => {
+        const response = await executeTask(() => storiesService.getAuthUserSavedStories(filters), setLoading, setError) as PageResponse<StoryInfo>;
         return response;
     }, []);
 
     // Favorites
 
-    const addToFavorites = async (userId: string, storyId: string): Promise<boolean> => {
-        const response = await executeTask(() => storiesService.addToFavorites(userId, storyId), setLoading, setError, showAlert, true);
+    const addToFavorites = async (storyId: string): Promise<boolean> => {
+        const response = await executeTask(() => storiesService.addToFavorites(storyId), setLoading, setError, showAlert, true);
         if (!response) return false;
         return true;
     }
 
-    const removeFromFavorites = async (userId: string, storyId: string): Promise<boolean> => {
-        const response = await executeTask(() => storiesService.removeFromFavorites(userId, storyId), setLoading, setError, showAlert, true);
+    const removeFromFavorites = async (storyId: string): Promise<boolean> => {
+        const response = await executeTask(() => storiesService.removeFromFavorites(storyId), setLoading, setError, showAlert, true);
         if (!response) return false;
         return true;
     }
 
-    const existsFromFavorites = useCallback(async (userId: string, storyId: string): Promise<boolean> => {
-        const response = await executeTask(() => storiesService.existsFromFavorites(userId, storyId), setLoading, setError, showAlert, true);
+    const existsFromFavorites = useCallback(async (storyId: string): Promise<boolean> => {
+        const response = await executeTask(() => storiesService.existsFromFavorites(storyId), setLoading, setError, showAlert, true);
         if (!response) return false;
         return true;
     }, [showAlert]);

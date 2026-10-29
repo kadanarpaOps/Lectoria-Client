@@ -9,8 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 type SearchFormValues = z.infer<typeof searchSchema>;
 
 interface Props {
-  loadStories: (filters: StoryFilters, userId?: string) => Promise<PageResponse<StoryInfo>>;
-  userId?: string;
+  loadStories: (filters: StoryFilters) => Promise<PageResponse<StoryInfo>>;
 }
 
 interface UseSearchStoriesResults {
@@ -21,7 +20,7 @@ interface UseSearchStoriesResults {
   resetSearch: () => void;
 }
 
-export const useSearchStories = ({ loadStories, userId }: Props): UseSearchStoriesResults => {
+export const useSearchStories = ({ loadStories }: Props): UseSearchStoriesResults => {
 
   const [ resultStories, setResultStories ] = useState<PageResponse<StoryInfo> | null>(null);
   const [ loading, setLoading ] = useState<boolean>(false);
@@ -56,14 +55,14 @@ export const useSearchStories = ({ loadStories, userId }: Props): UseSearchStori
       newestFirst: values.newestFirst,
     };
 
-    const response = await loadStories!(filters, userId);
+    const response = await loadStories(filters);
     if (!response.data) {
       setResultStories(null);
     }
     setResultStories(response);
     
     setLoading(false);
-  }, [loadStories, userId]);
+  }, [loadStories]);
 
   const resetSearch = () => {
     searchForm.reset({

@@ -36,7 +36,7 @@ export class CommentService implements CommentPort {
     return deleteCommentRequest(commentId);
   }
 
-  toggleCommentLike(commentId: string, userId: string): Promise<CommentMutationResponse> {
-    return toggleCommentLikeRequest(commentId, userId);
+  toggleCommentLike(commentId: string): Promise<CommentMutationResponse> {
+    return toggleCommentLikeRequest(commentId);
   }
 }

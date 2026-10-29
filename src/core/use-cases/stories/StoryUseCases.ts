@@ -19,13 +19,13 @@ export class StoryService implements StoryPort {
         return pagedStories;
     }
 
-    async getAuthUserStories(filters: StoryFilters, userId: string): Promise<PageResponse<StoryInfo>> {
-        const pagedStories = await getAuthUserStoriesRequest(filters, userId);
+    async getAuthUserStories(filters: StoryFilters): Promise<PageResponse<StoryInfo>> {
+        const pagedStories = await getAuthUserStoriesRequest(filters);
         return pagedStories;
     }
 
-    async getAuthUserSavedStories(filters: StoryFilters, userId: string): Promise<PageResponse<StoryInfo>> {
-        const pagedStories = await getAuthUserSavedStoriesRequest(filters, userId);
+    async getAuthUserSavedStories(filters: StoryFilters): Promise<PageResponse<StoryInfo>> {
+        const pagedStories = await getAuthUserSavedStoriesRequest(filters);
         return pagedStories;
     }
 
@@ -34,8 +34,8 @@ export class StoryService implements StoryPort {
         return story;
     }
 
-    async getLastModifiedStory(userId: string): Promise<LastModifiedStory> {
-        const story = await getLastModifiedStoryRequest(userId);
+    async getLastModifiedStory(): Promise<LastModifiedStory> {
+        const story = await getLastModifiedStoryRequest();
         return story;
     }
 
@@ -76,18 +76,18 @@ export class StoryService implements StoryPort {
 
     // Favorites
 
-    async addToFavorites(userId: string, storyId: string): Promise<void> {
-        const response = await addToFavoritesRequest(userId, storyId);
+    async addToFavorites(storyId: string): Promise<void> {
+        const response = await addToFavoritesRequest(storyId);
         return response;
     }
 
-    async removeFromFavorites(userId: string, storyId: string): Promise<void> {
-        const response = await removeFromFavoritesRequest(userId, storyId);
+    async removeFromFavorites(storyId: string): Promise<void> {
+        const response = await removeFromFavoritesRequest(storyId);
         return response;
     }
 
-    async existsFromFavorites(userId: string, storyId: string): Promise<void> {
-        const response = await verifyFromFavoritesRequest(userId, storyId);
+    async existsFromFavorites(storyId: string): Promise<boolean> {
+        const response = await verifyFromFavoritesRequest(storyId);
         return response;
     }
 

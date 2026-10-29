@@ -12,7 +12,6 @@ import type { EditingChapter } from '../../../core/domain/models/chapters/Chapte
 import { useAlert } from '../../hooks/useAlert';
 import SaveActualEditionModal from '../../components/writing/SaveActualEditionModal';
 import LoadLastEditionModal from '../../components/writing/LoadLastEditionModal';
-import { useAuth } from '../../hooks/useAuth';
 
 const extensions = [
     TextStyleKit, StarterKit,
@@ -37,7 +36,6 @@ export default function Write() {
     const location = useLocation();
     // Use Alerts
     const { showAlert } = useAlert();
-    const { authUser } = useAuth();
 
     // Load or Recover Story
     const [ editingChapter, setEditingChapter ] = useState<EditingChapter | null>(null);
@@ -163,17 +161,6 @@ export default function Write() {
         if (success) {
             setAnotherChapter();
         }
-    }
-
-    if (!authUser?.userId) {
-        return (
-            <main className="mx-auto max-w-3xl px-6 py-16">
-                <section className="rounded-3xl border border-amber-400/20 bg-background-global p-8">
-                    <h1 className="text-3xl font-bold text-global">Escribir en Lectoria</h1>
-                    <p className="mt-4 text-several-light">La API de Lectoria no entrega el identificador que story-service necesita para crear y guardar capítulos vinculados a una cuenta.</p>
-                </section>
-            </main>
-        );
     }
 
     {/** Casuística 1 */}

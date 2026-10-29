@@ -38,13 +38,10 @@ const EditStory = () => {
   const [ chapters, setChapters ] = useState<PageResponse<ChapterInfo> | null>(null);
   useEffect(() => {
     const loadStory = async () => {
-      if (storyId && authUser?.userId) {
+      if (storyId && authUser) {
         const responseStory = await loadStoryById(storyId);
         if (responseStory === null) {
           navigate("/network-lost");
-        }
-        if (responseStory.userId !== authUser.userId) {
-          navigate("/forbidden")
         }
         setStory(responseStory);
 
@@ -188,17 +185,6 @@ const EditStory = () => {
         setModifiedChapters(true);
       }
     }
-  }
-
-  if (!authUser?.userId) {
-    return (
-      <main className="mx-auto max-w-3xl px-6 py-16">
-        <section className="rounded-3xl border border-amber-400/20 bg-background-global p-8">
-          <h1 className="text-3xl font-bold text-global">Editar historia</h1>
-          <p className="mt-4 text-several-light">La API de Lectoria no incluye el identificador de usuario necesario para comprobar la propiedad de una historia en story-service.</p>
-        </section>
-      </main>
-    );
   }
 
   return (

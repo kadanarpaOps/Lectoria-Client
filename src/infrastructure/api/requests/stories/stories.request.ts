@@ -21,15 +21,15 @@ export const getStoriesRequest = async (filters: StoryFilters) : Promise<PageRes
     return response.data;
 }
 
-export const getAuthUserStoriesRequest = async (filters: StoryFilters, userId: string): Promise<PageResponse<StoryInfo>> => {
-    const response = await storyClient.get(`api/story/search/${userId}`, {
+export const getAuthUserStoriesRequest = async (filters: StoryFilters): Promise<PageResponse<StoryInfo>> => {
+    const response = await storyClient.get(`api/story/mine`, {
         params: filters
     });
     return response.data;
 }
 
-export const getAuthUserSavedStoriesRequest = async (filters: StoryFilters, userId: string): Promise<PageResponse<StoryInfo>> => {
-    const response = await storyClient.get(`api/favorite/search/${userId}`, {
+export const getAuthUserSavedStoriesRequest = async (filters: StoryFilters): Promise<PageResponse<StoryInfo>> => {
+    const response = await storyClient.get(`api/favorite/search`, {
         params: filters
     });
 
@@ -48,8 +48,8 @@ export const getStoryByIdRequest = async (storyId: string): Promise<StoryInfo> =
     return response.data;
 }
 
-export const getLastModifiedStoryRequest = async (userId: string): Promise<LastModifiedStory> => {
-    const response = await storyClient.get(`api/story/last-modified/${userId}`);
+export const getLastModifiedStoryRequest = async (): Promise<LastModifiedStory> => {
+    const response = await storyClient.get(`api/story/last-modified`);
     return response.data;
 }
 
@@ -101,20 +101,17 @@ export const updateStoryTags = async (tagNames: string[], storyId: string): Prom
 }
 
 // Favorites
-export const addToFavoritesRequest = async (userId: string, storyId: string): Promise<void> => {
-    const response = await storyClient.post(`api/favorite/add`, {
-        userId: userId,
-        storyId: storyId
-    });
+export const addToFavoritesRequest = async (storyId: string): Promise<void> => {
+    const response = await storyClient.post(`api/favorite/add/${storyId}`);
     return response.data;
 }
 
-export const removeFromFavoritesRequest = async (userId: string, storyId: string): Promise<void> => {
-    const response = await storyClient.delete(`api/favorite/remove/${userId}/story/${storyId}`);
+export const removeFromFavoritesRequest = async (storyId: string): Promise<void> => {
+    const response = await storyClient.delete(`api/favorite/remove/story/${storyId}`);
     return response.data;
 }
 
-export const verifyFromFavoritesRequest = async (userId: string, storyId: string): Promise<void> => {
-    const response = await storyClient.get(`api/favorite/exists/${userId}/story/${storyId}`);
+export const verifyFromFavoritesRequest = async (storyId: string): Promise<boolean> => {
+    const response = await storyClient.get(`api/favorite/exists/story/${storyId}`);
     return response.data.data;
 }

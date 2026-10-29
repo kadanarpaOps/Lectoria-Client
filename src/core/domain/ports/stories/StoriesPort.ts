@@ -5,10 +5,10 @@ export interface StoryPort {
     getAllGenres(): Promise<BasicInfo[]>;
     pageTags(offset: number, limit: number, tagName: string): Promise<PageResponse<BasicInfo>>;
     getStories(filters: StoryFilters): Promise<PageResponse<StoryInfo>>;
-    getAuthUserStories(filters: StoryFilters, userId: string): Promise<PageResponse<StoryInfo>>;
-    getAuthUserSavedStories(filters: StoryFilters, userId: string): Promise<PageResponse<StoryInfo>>;
+    getAuthUserStories(filters: StoryFilters): Promise<PageResponse<StoryInfo>>;
+    getAuthUserSavedStories(filters: StoryFilters): Promise<PageResponse<StoryInfo>>;
     getStoryById(storyId: string): Promise<StoryInfo>;
-    getLastModifiedStory(userId: string): Promise<LastModifiedStory>;
+    getLastModifiedStory(): Promise<LastModifiedStory>;
     registerStory(story: RegisterStory): Promise<void>
     updateStory(story: UpdateStory, storyId: string): Promise<void>;
     toggleStoryHidden(storyId: string): Promise<void>;
@@ -17,7 +17,7 @@ export interface StoryPort {
     deleteStoryCover(storyId: string): Promise<void>;
     updateStoryTags(tagNames: string[], storyId: string ): Promise<void>;
     //Favorites
-    addToFavorites(userId: string, storyId: string): Promise<void>;
-    removeFromFavorites(userId: string, storyId: string): Promise<void>;
-    existsFromFavorites(userId: string, storyId: string): Promise<void>;
+    addToFavorites(storyId: string): Promise<void>;
+    removeFromFavorites(storyId: string): Promise<void>;
+    existsFromFavorites(storyId: string): Promise<boolean>;
 }

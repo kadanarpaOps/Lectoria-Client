@@ -47,7 +47,6 @@ export interface RegisterStory {
     genreName: string;
     secondaryGenreName: string;
     tagNames: string [] | null;
-    userId: string;
     image: File | null;
 }
 
@@ -68,7 +67,6 @@ export interface StoryFilters {
     status?: StatusNames;
     tagNames?: string[];
     newestFirst?: boolean;
-    userId?: string;
 }
 
 export interface UpdateTags {

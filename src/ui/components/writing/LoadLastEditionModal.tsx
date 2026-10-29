@@ -21,16 +21,11 @@ const LoadLastEditionModal = ({ setChapter }: Props) => {
   useEffect(() => {
     const loadLastStory = async () => {
       if (authUser) {
-        const responseStory = await loadLastModifiedStoryForAuthUser(authUser.userId);
-        console.log(responseStory);
+        const responseStory = await loadLastModifiedStoryForAuthUser();
         if (responseStory !== null) {
-          if (responseStory.userId !== authUser.userId) {
-            navigate("/forbidden");
-          } else {
-            setLastStory(responseStory);
-            if (responseStory.chapters.length > 0) {
-              setLastChapter(responseStory.chapters[0]);
-            }
+          setLastStory(responseStory);
+          if (responseStory.chapters.length > 0) {
+            setLastChapter(responseStory.chapters[0]);
           }
         }
         setLastStory(responseStory);
@@ -38,7 +33,7 @@ const LoadLastEditionModal = ({ setChapter }: Props) => {
     };
 
     loadLastStory();
-  }, [authUser, authUser?.userId, loadLastModifiedStoryForAuthUser, navigate]);
+  }, [authUser, loadLastModifiedStoryForAuthUser]);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";

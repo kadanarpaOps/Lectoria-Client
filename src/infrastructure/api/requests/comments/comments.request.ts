@@ -45,8 +45,7 @@ export const deleteCommentRequest = async (commentId: string): Promise<CommentMu
 
 export const toggleCommentLikeRequest = async (
   commentId: string,
-  userId: string,
 ): Promise<CommentMutationResponse> => {
-  const response = await storyClient.patch(`api/comment/toggle-like/${commentId}/${userId}`);
+  const response = await storyClient.patch(`api/comment/toggle-like/${commentId}`);
   return response.data;
 };

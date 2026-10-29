@@ -12,5 +12,5 @@ export interface CommentPort {
   getChapterComments(chapterId: string, filters: CommentFilters): Promise<CommentPageResponse>;
   updateComment(commentId: string, request: UpdateCommentRequest): Promise<CommentMutationResponse>;
   deleteComment(commentId: string): Promise<CommentMutationResponse>;
-  toggleCommentLike(commentId: string, userId: string): Promise<CommentMutationResponse>;
+  toggleCommentLike(commentId: string): Promise<CommentMutationResponse>;
 }

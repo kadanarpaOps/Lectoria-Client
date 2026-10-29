@@ -102,9 +102,8 @@ const CreateStory = () => {
 
   // On Submit
   const onSubmit = async (data: CreateFormValues) => {
-    if (!authUser?.userId) return;
-    const createRequest: RegisterStory = { ...data, userId: authUser.userId };
-    const success = await createStory(createRequest);
+    if (!authUser) return;
+    const success = await createStory(data as RegisterStory);
     if (success) {
       navigate("/profile");
       reset();
@@ -120,17 +119,6 @@ const CreateStory = () => {
       }
     };
   }, [previewUrl]);
-
-  if (!authUser?.userId) {
-    return (
-      <main className="mx-auto max-w-3xl px-6 py-16">
-        <section className="rounded-3xl border border-amber-400/20 bg-background-global p-8">
-          <h1 className="text-3xl font-bold text-global">Crear una historia</h1>
-          <p className="mt-4 text-several-light">La API de Lectoria no expone el identificador requerido por story-service para asociar una historia a su autor. La creación se habilitará cuando el perfil o la sesión proporcionen ese identificador.</p>
-        </section>
-      </main>
-    );
-  }
 
   return (
     <main className="flex min-h-screen overflow-x-hidden">
