@@ -18,7 +18,6 @@ export interface CommentFilters {
 }
 
 export interface CreateCommentRequest {
-  username: string;
   content: string;
   storyId?: string;
   chapterId?: string;

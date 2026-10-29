@@ -44,7 +44,7 @@ const LoadLastEditionModal = ({ setChapter }: Props) => {
 
   return (
     <div className="fixed inset-0 z-100 bg-black/30 flex flex-col items-center justify-center p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl bg-search-bg rounded-2xl flex-col p-8 h-[70vh] overflow-y-auto custom-scrollbar">
+      <div className="relative w-full max-w-2xl bg-search-bg rounded-2xl flex-col p-4 sm:p-8 max-h-[85dvh] overflow-y-auto custom-scrollbar">
         <div onClick={() => navigate(-1)} className="absolute mt-1 hover:text-high-enfasis cursor-pointer transition-all duration-300">
           <ChevronLeft size={24} />
         </div>
@@ -84,14 +84,14 @@ const LoadLastEditionModal = ({ setChapter }: Props) => {
               {lastChapter ? (
                 <div
                   onClick={() => setChapter({ ...lastChapter, order: lastChapter.order.toString() })}
-                  className="group relative w-max rounded-2xl bg-toolbar-bg cursor-pointer hover:scale-95 transition-all duration-300 overflow-hidden"
+                  className="group relative w-full sm:w-max rounded-2xl bg-toolbar-bg cursor-pointer hover:scale-95 transition-all duration-300 overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-linear-to-br from-black/20 to-transparent"></div>
-                  <div className="relative z-10 p-6 flex flex-row gap-4 items-center h-full justify-start">
+                  <div className="relative z-10 p-4 sm:p-6 flex flex-row gap-3 sm:gap-4 items-center h-full justify-start">
                     <span className="text-4xl text-high-enfasis">
                       <ChevronsRight size={40} />
                     </span>
-                    <span className="text-2xl font-bold text-fujiWhite tracking-tight">
+                    <span className="text-lg sm:text-2xl font-bold text-fujiWhite tracking-tight">
                       Sigue editando <span className="pl-2 font-light italic">Capítulo {lastChapter.order}</span>
                     </span>
                   </div>
@@ -99,14 +99,14 @@ const LoadLastEditionModal = ({ setChapter }: Props) => {
               ) : (
                 <div
                   onClick={() => navigate(`/story/edit/${lastStory.id}`)}
-                  className="group relative w-max rounded-2xl bg-toolbar-bg cursor-pointer hover:scale-95 transition-all duration-300 overflow-hidden"
+                  className="group relative w-full sm:w-max rounded-2xl bg-toolbar-bg cursor-pointer hover:scale-95 transition-all duration-300 overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-linear-to-br from-black/20 to-transparent"></div>
-                  <div className="relative z-10 p-6 flex flex-row gap-4 items-center h-full justify-start">
+                  <div className="relative z-10 p-4 sm:p-6 flex flex-row gap-3 sm:gap-4 items-center h-full justify-start">
                     <span className="text-4xl text-high-enfasis">
                       <ChevronsRight size={40} />
                     </span>
-                    <span className="text-2xl font-bold text-fujiWhite tracking-tight">
+                    <span className="text-lg sm:text-2xl font-bold text-fujiWhite tracking-tight">
                       Crea un capítulo
                     </span>
                   </div>
@@ -127,14 +127,14 @@ const LoadLastEditionModal = ({ setChapter }: Props) => {
         <div className="flex items-center justify-center">
           <Link
             to="/library"
-            className="group relative w-max rounded-2xl bg-toolbar-bg cursor-pointer hover:scale-95 transition-all duration-300 overflow-hidden"
+            className="group relative w-full sm:w-max rounded-2xl bg-toolbar-bg cursor-pointer hover:scale-95 transition-all duration-300 overflow-hidden"
           >
             <div className="absolute inset-0 bg-linear-to-br from-black/20 to-transparent"></div>
-            <div className="relative z-10 p-6 flex flex-row gap-4 items-center h-full justify-start">
+            <div className="relative z-10 p-4 sm:p-6 flex flex-row gap-3 sm:gap-4 items-center h-full justify-start">
               <span className="text-4xl text-high-enfasis">
                 <BookOpenText size={40} />
               </span>
-              <span className="text-2xl font-bold text-fujiWhite tracking-tight">
+              <span className="text-lg sm:text-2xl font-bold text-fujiWhite tracking-tight">
                 Edita alguna de tus otras historias
               </span>
             </div>

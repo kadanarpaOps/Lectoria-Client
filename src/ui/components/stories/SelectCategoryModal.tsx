@@ -29,7 +29,7 @@ const SelectCategoryModal = ({ repeatedGenres, onCancel, onSelect }: Props) => {
 
   return (
     <div className="fixed inset-0 z-100 bg-black/30 flex flex-col items-center justify-center p-4 backdrop-blur-sm">
-        <div className="relative w-full max-w-2xl bg-search-bg rounded-2xl flex-col p-8 h-[80vh] overflow-y-auto custom-scrollbar">
+        <div className="relative w-full max-w-2xl bg-search-bg rounded-2xl flex-col p-4 sm:p-8 max-h-[85dvh] overflow-y-auto custom-scrollbar">
           { !loading ? (
             <>
               <div className="text-center mb-8">
@@ -49,7 +49,7 @@ const SelectCategoryModal = ({ repeatedGenres, onCancel, onSelect }: Props) => {
                         </button>
                         <input
                             type="text"
-                            className="bg-background-global border-none rounded-full py-2 pl-10 pr-6 text-sm text-global focus:ring-2 focus:ring-high-enfasis/50 w-64 transition-all focus:outline-none"
+                            className="bg-background-global border-none rounded-full py-2 pl-10 pr-6 text-sm text-global focus:ring-2 focus:ring-high-enfasis/50 w-full max-w-64 transition-all focus:outline-none"
                             placeholder="Buscar Género..."
                             ref={searchedGenreRef}
                             onChange={handleSearchedGenreChange}
@@ -93,7 +93,7 @@ const SelectCategoryModal = ({ repeatedGenres, onCancel, onSelect }: Props) => {
             </div>
           )}
         </div>
-        <button onClick={onCancel} className="mt-6 bg-high-enfasis font-bold px-8 py-2 rounded-2xl hover:scale-95 transition-all cursor-pointer text-background-global">
+        <button onClick={onCancel} className="mt-4 sm:mt-6 bg-high-enfasis font-bold px-8 py-2 rounded-2xl hover:scale-95 transition-all cursor-pointer text-background-global">
           Cancelar
         </button>
     </div>

@@ -7,10 +7,11 @@ import type { StoryInfo } from "../../../core/domain/models/stories/StoryModel"
 
 type NavbarProps = {
     isSidebarOpen: boolean | null,
+    isMobile: boolean,
     toggleSidebar: () => void
 }
 
-const Navbar = ({ isSidebarOpen, toggleSidebar }: NavbarProps) => {
+const Navbar = ({ isSidebarOpen, isMobile, toggleSidebar }: NavbarProps) => {
 
   // Use Location
   const location = useLocation();
@@ -49,9 +50,9 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }: NavbarProps) => {
   const isInSearchPage = location.pathname.includes("/library") || (location.pathname.includes("/explore") && !location.pathname.includes("/explore/story"));
 
   return (
-    <header className={`${isSidebarOpen !== null ? 'sticky' : 'fixed'} top-0 z-40 w-full bg-background-global/80 backdrop-blur-sm pl-8 pr-12 py-4`}>
-        <div className={`grid grid-cols-3 items-center
-            ${location.pathname.includes("/write") && !isSidebarOpen && 'transition-opacity duration-500 opacity-0 hover:opacity-100'}
+    <header className={`${isSidebarOpen !== null ? 'sticky' : 'fixed'} top-0 z-40 w-full bg-background-global/80 backdrop-blur-sm px-3 sm:px-6 lg:px-8 py-3 sm:py-4`}>
+        <div className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2
+            ${location.pathname.includes("/write") && !isSidebarOpen && !isMobile && 'transition-opacity duration-500 opacity-0 hover:opacity-100'}
         `}>
             <div className="flex items-center space-x-4">
                 {isSidebarOpen !== null && (
@@ -71,8 +72,8 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }: NavbarProps) => {
                     </>
                 )}
             </div>
-            <div className="flex justify-center items-center col-span-1">
-                <div className="flex items-center relative group">
+            <div className="flex justify-center items-center min-w-0">
+                <div className="flex items-center relative group w-full max-w-md">
                     <button
                       className="text-global hover:text-high-enfasis absolute top-2.2 left-3 opacity-50"
                       type="button"
@@ -82,7 +83,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }: NavbarProps) => {
                     <div onBlur={() => setToSearchTitle("")}>
                         <input
                             type="text"
-                            className="bg-search-bg border-none rounded-full py-2 pl-10 pr-6 text-sm text-global focus:ring-2 focus:ring-high-enfasis/50 w-94 transition-all focus:outline-none"
+                            className="bg-search-bg border-none rounded-full py-2 pl-10 pr-4 text-sm text-global focus:ring-2 focus:ring-high-enfasis/50 w-full min-w-0 transition-all focus:outline-none"
                             placeholder="Buscar Historias..."
                             ref={searchedStoryRef}
                             onChange={handleInputChange}

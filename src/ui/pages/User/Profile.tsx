@@ -139,7 +139,7 @@ export default function Profile() {
           className="h-full w-full object-cover grayscale opacity-40"
         />
         <div className="absolute inset-0 bg-linear-to-t from-background-global to-transparent">
-          <div className="absolute right-12 top-8 z-20 flex flex-col items-end gap-3">
+          <div className="absolute right-4 sm:right-12 top-4 sm:top-8 z-20 flex flex-col items-end gap-3">
             {roleNames.includes("LECTORIA_ADMIN") ? (
               <span className="rounded-full border border-high-enfasis bg-high-enfasis/5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-high-enfasis">
                 Administrador
@@ -160,7 +160,7 @@ export default function Profile() {
 
       <div className="relative z-20 -mt-12 px-6 sm:px-12">
         <div className="flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-end">
-          <div className="flex items-end gap-6">
+          <div className="flex min-w-0 items-end gap-3 sm:gap-6">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -181,9 +181,9 @@ export default function Profile() {
               </span>
               <input ref={fileInputRef} type="file" className="hidden" accept="image/jpeg,image/png,image/webp" onChange={selectImage} />
             </button>
-            <div className="pb-2">
-              <h1 className="text-3xl font-bold text-global">{authUser.username}</h1>
-              <p className="font-medium text-several-light">{authUser.email}</p>
+            <div className="min-w-0 pb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-global break-all">{authUser.username}</h1>
+              <p className="font-medium text-several-light break-all">{authUser.email}</p>
             </div>
           </div>
           {authUser.profileImageUrl && (

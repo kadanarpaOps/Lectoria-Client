@@ -45,17 +45,15 @@ function AuthProvider({ children }: Props) {
      
     // Validate Auth Methods for Interceptor
     const validateAccess = async (): Promise<SessionValidation> => {
-        const validationResponse = await executeTask(() => authService.validateAccess(), () => {}, setError) as SessionValidation;
-        return validationResponse;
+        return authService.validateAccess();
     };
 
     const validateSession = async (): Promise<SessionValidation> => {
-        const validationResponse = await executeTask(() => authService.validateSession(), () => {}, setError) as SessionValidation;
-        return validationResponse;
+        return authService.validateSession();
     };
 
     const refreshSession = async (): Promise<void> => {
-        await executeTask(() => authService.refreshSession(), () => {}, setError);
+        await authService.refreshSession();
     };
     /** useEffects */
     // Refresh Auth User Info
@@ -64,6 +62,11 @@ function AuthProvider({ children }: Props) {
         const checkAuth = async () => {
             const response = await executeTask(() => authService.validateSession(), setLoading, setError);
             if (!response?.active) {
+                setAuthUser(null);
+                return;
+            }
+            const refreshed = await executeTask(() => authService.refreshSession(), setLoading, setError);
+            if (refreshed === null) {
                 setAuthUser(null);
                 return;
             }

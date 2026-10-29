@@ -15,11 +15,11 @@ function LandingNavbar() {
 
     return (
         <header className="sticky top-0 z-40 w-full bg-[#c8b97a] shadow-[0_2px_16px_rgba(0,0,0,0.4)]">
-            <div className="grid grid-cols-2 justify-around items-center px-8 h-14">
+            <div className="grid grid-cols-[1fr_auto] justify-between items-center gap-2 px-3 sm:px-8 h-14">
                 {/* Izquierda — Logo */}
                 <div className="flex items-center gap-3">
                     <img src="/Lectoria-favicon.svg" alt="Lectoria" className="w-7 h-7 opacity-80" />
-                    <span className="text-[#1a2030] font-bold text-lg tracking-widest uppercase">Lectoria</span>
+                    <span className="text-[#1a2030] font-bold text-sm sm:text-lg tracking-widest uppercase">Lectoria</span>
                 </div>
 
                 {/* Centro — Búsqueda */}
@@ -37,7 +37,7 @@ function LandingNavbar() {
                 </div>*/}
 
                 {/* Derecha — CTAs */}
-                <div className="flex items-center justify-end gap-3">
+                <div className="flex items-center justify-end gap-1 sm:gap-3">
                     { authUser ? (
                         <button
                             onClick={() => navigate('/profile')}
@@ -49,13 +49,13 @@ function LandingNavbar() {
                         <>
                             <button
                                 onClick={() => navigate('/auth')}
-                                className="text-[#1a2030] text-sm font-medium px-4 py-1.5 rounded-full border border-[#1a2030]/30 hover:bg-[#1a2030]/10 transition-colors cursor-pointer"
+                                className="text-[#1a2030] text-xs sm:text-sm font-medium px-2 sm:px-4 py-1.5 rounded-full border border-[#1a2030]/30 hover:bg-[#1a2030]/10 transition-colors cursor-pointer"
                             >
                                 Iniciar sesión
                             </button>
                             <button
                                 onClick={() => navigate('/auth', { state: { authAction: "REGISTER" }})}
-                                className="bg-[#1a2030] text-[#c8b97a] text-sm font-semibold px-4 py-1.5 rounded-full hover:bg-[#1a2030]/80 transition-colors cursor-pointer"
+                                className="bg-[#1a2030] text-[#c8b97a] text-xs sm:text-sm font-semibold px-2 sm:px-4 py-1.5 rounded-full hover:bg-[#1a2030]/80 transition-colors cursor-pointer"
                             >
                                 Registrarse
                             </button>
@@ -101,16 +101,16 @@ function Hero() {
                     </p>
                 </div>
                 {/* CTA hero */}
-                <div className="flex items-center gap-4 mt-2">
+                <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-2">
                     <button
                         onClick={() => navigate('/auth')}
-                        className="bg-[#c8b97a] text-[#1a1a24] font-semibold text-sm px-7 py-2.5 rounded-full hover:bg-[#d4c98a] transition-colors cursor-pointer tracking-wide"
+                        className="bg-[#c8b97a] text-[#1a1a24] font-semibold text-xs sm:text-sm px-5 sm:px-7 py-2.5 rounded-full hover:bg-[#d4c98a] transition-colors cursor-pointer tracking-wide"
                     >
                         Comenzar a leer
                     </button>
                     <button
                         onClick={() => navigate('/auth')}
-                        className="border border-[#c8b97a]/40 text-[#c8b97a] font-medium text-sm px-7 py-2.5 rounded-full hover:bg-[#c8b97a]/10 transition-colors cursor-pointer tracking-wide"
+                        className="border border-[#c8b97a]/40 text-[#c8b97a] font-medium text-xs sm:text-sm px-5 sm:px-7 py-2.5 rounded-full hover:bg-[#c8b97a]/10 transition-colors cursor-pointer tracking-wide"
                     >
                         Publicar historia
                     </button>
@@ -258,7 +258,7 @@ const FEATURED_BOOKS: BookCardProps[] = [
 
 function FeaturedSection() {
     return (
-        <section className="bg-background-global py-20 px-8">
+        <section className="bg-background-global py-14 sm:py-20 px-4 sm:px-8">
             <div className="max-w-275 mx-auto">
                 <div className="text-center flex flex-col gap-3 mb-14">
                     <span className="text-[#c8b97a]/60 text-xs tracking-[0.3em] uppercase font-light">Destacado</span>
@@ -280,7 +280,7 @@ function FeaturedSection() {
 // ─── Sobre Nosotros ───────────────────────────────────────────────────────────
 function AboutSection() {
     return (
-        <section className="bg-[#13131a] py-24 px-8 overflow-hidden">
+        <section className="bg-[#13131a] py-16 sm:py-24 px-4 sm:px-8 overflow-hidden">
             <div className="max-w-275 mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
 
                 {/* Izquierda — Texto */}
@@ -348,7 +348,7 @@ function AboutSection() {
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function Footer() {
     return (
-        <footer className="bg-surface-container-lowest py-10 px-8 border-t border-[#c8b97a]/08">
+        <footer className="bg-surface-container-lowest py-8 sm:py-10 px-4 sm:px-8 border-t border-[#c8b97a]/08">
             <div className="max-w-275 mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-2">
                     <img src="/Lectoria-favicon.svg" alt="Lectoria" className="w-5 h-5 opacity-50" />

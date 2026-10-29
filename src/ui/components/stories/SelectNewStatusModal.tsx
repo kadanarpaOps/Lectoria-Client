@@ -20,7 +20,7 @@ const SelectNewStatusModal = ({ repeatedStatus, onCancel, onSelect }: Props) => 
 
   return (
     <div className="fixed inset-0 z-100 bg-black/30 flex flex-col items-center justify-center p-4 backdrop-blur-sm">
-        <div className="relative w-full max-w-2xl bg-search-bg rounded-2xl flex-col p-8 h-[70vh] overflow-y-auto custom-scrollbar">
+        <div className="relative w-full max-w-2xl bg-search-bg rounded-2xl flex-col p-4 sm:p-8 max-h-[85dvh] overflow-y-auto custom-scrollbar">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-fujiWhite tracking-tight">
                   Selecciona un nuevo estado
@@ -50,7 +50,7 @@ const SelectNewStatusModal = ({ repeatedStatus, onCancel, onSelect }: Props) => 
                 )}
               </div>
         </div>
-        <button onClick={onCancel} className="mt-6 bg-high-enfasis font-bold px-8 py-2 rounded-2xl hover:scale-95 transition-all cursor-pointer text-background-global">
+        <button onClick={onCancel} className="mt-4 sm:mt-6 bg-high-enfasis font-bold px-8 py-2 rounded-2xl hover:scale-95 transition-all cursor-pointer text-background-global">
           Cancelar
         </button>
     </div>

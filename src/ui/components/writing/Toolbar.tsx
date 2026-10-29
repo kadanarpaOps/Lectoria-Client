@@ -12,11 +12,11 @@ const Toolbar = ({ editor, onSave }: { editor: Editor, onSave(): void }) => {
   })
 
   return (
-        <div className="sticky top-24 z-30 w-full max-w-4xl bg-search-bg/90 backdrop-opacity-95 rounded-2xl p-2 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.4)] mb-12">
-            <div className="flex items-center space-x-1">
+        <div className="sticky top-16 sm:top-24 z-30 w-full max-w-4xl bg-search-bg/95 backdrop-opacity-95 rounded-2xl p-2 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 shadow-[0_8px_32px_rgba(0,0,0,0.4)] mb-8 sm:mb-12">
+            <div className="flex items-center space-x-1 overflow-x-auto max-w-full">
                 {/** Font Selector */}
-                <div className="relative group px-3 border-r border-toolbar-bg/30">
-                    <button className="flex items-center cursor-pointer space-x-2 text-sm text-global py-1.5 px-2 hover:bg-toolbar-bg/50 rounded transition-all">
+                <div className="relative group px-1 sm:px-3 border-r border-toolbar-bg/30 shrink-0">
+                    <button className="flex items-center cursor-pointer space-x-2 text-xs sm:text-sm text-global py-1.5 px-2 hover:bg-toolbar-bg/50 rounded transition-all">
                         <span>Serif (Clásica)</span>
                         <ChevronDown size={20} />
                     </button>
@@ -95,7 +95,7 @@ const Toolbar = ({ editor, onSave }: { editor: Editor, onSave(): void }) => {
                 onClick={() => {
                     onSave();
                 }}
-                className="bg-high-enfasis cursor-pointer text-background-global px-6 py-2 rounded-xl font-bold text-sm tracking-tight hover:scale-95 transition-all"
+                className="bg-high-enfasis cursor-pointer text-background-global px-4 sm:px-6 py-2 rounded-xl font-bold text-sm tracking-tight hover:scale-95 transition-all shrink-0"
             >
                 Guardar
             </button>

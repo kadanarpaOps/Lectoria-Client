@@ -8,8 +8,9 @@ import { Bookmark, BookOpen, Clock, Info, List, MessageSquareText, Pencil } from
 import { useChapters } from "../../hooks/useChapters";
 import type { PageResponse } from "../../../core/domain/models/common/PaginationModels";
 import type { ChapterInfo } from "../../../core/domain/models/chapters/ChapterModel";
-import { countTotalWords, renderWithoutFormat } from "../utils/renderTiptap.util";
+import { countTotalWords, parseTiptapContent, renderWithoutFormat } from "../utils/renderTiptap.util";
 import { getLastModifiedTime } from "../utils/time.util";
+import CommentsSection from "../../components/stories/CommentsSection";
 
 const StoryDetails = () => {
 
@@ -28,6 +29,7 @@ const StoryDetails = () => {
   const [ favorite, setFavorite ] = useState<boolean>(false);
   const [ chapters, setChapters ] = useState<PageResponse<ChapterInfo> | null>(null);
   const [ totalItemsChapters, setTotalChaptersItems ] = useState<number | null>(null)
+  const isOwnStory = Boolean(authUser && story?.userId === authUser.userId);
 
   useEffect(() => {
     const loadStory = async () => {
@@ -35,11 +37,14 @@ const StoryDetails = () => {
         const responseStory = await loadStoryById(storyId);
         if (responseStory === null) {
           navigate("*");
+          return;
         }
         setStory(responseStory);
-        if (authUser) {
+        if (authUser && responseStory.userId !== authUser.userId) {
           const responseFavorite = await existsFromFavorites(responseStory.id);
           setFavorite(responseFavorite);
+        } else {
+          setFavorite(false);
         }
 
         const responseChapters = await getChaptersByStory({offset: 1, limit: 5, newestFirst: true}, responseStory.id);
@@ -70,9 +75,9 @@ const StoryDetails = () => {
   return (
     <main className="relative h-full">
       { story ? (
-        <div className="p-8 md:p-12 md:px-30 max-w-7xl mx-auto w-full">
+        <div className="p-4 sm:p-8 lg:p-12 xl:px-30 max-w-7xl mx-auto w-full">
           <section className="relative mb-16" id="info">
-            <div className="flex flex-col lg:flex-row gap-12 items-start">
+            <div className="flex flex-col lg:flex-row gap-7 sm:gap-12 items-start">
               <div className="w-full lg:w-72 shrink-0 group relative">
                 <div className="aspect-2/3 w-full bg-surface-container-high rounded-xl overflow-hidden shadow-2xl relative">
                   <img
@@ -96,7 +101,7 @@ const StoryDetails = () => {
                     {story.secondaryGenre.name}
                   </span>
                 </div>
-                <h2 className="text-5xl md:text-6xl font-headline font-bold tracking-tighter text-on-surface leading-[1.1]">
+                <h2 className="text-4xl sm:text-5xl md:text-6xl font-headline font-bold tracking-tighter text-on-surface leading-[1.1] break-words">
                   {story.title}
                 </h2>
                 <div className="flex items-center gap-4 text-on-surface-variant">
@@ -104,10 +109,8 @@ const StoryDetails = () => {
                     <span className="text-sm">
                       <Pencil size={20} fill="currentColor" />
                     </span>
-                    <span
-                      className="text-md font-medium"
-                    >
-                      Lectoria
+                    <span className="text-md font-medium">
+                      {isOwnStory ? "Tu historia" : "Autor"}
                     </span>
                   </div>
                   <div className="w-1 h-1 bg-outline-variant/30 rounded-full"></div>
@@ -134,7 +137,7 @@ const StoryDetails = () => {
                     </span>
                     Comenzar
                   </button>
-                  { authUser && (
+                  { authUser && !isOwnStory && (
                       <button
                         onClick={() => !favorite ? handleAddFavorite(story.id) : handleRemoveFavorite(story.id)}
                         className="border border-outline-variant/30 bg-surface-container-low text-on-surface px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-surface-container-high transition-all cursor-pointer"
@@ -165,8 +168,8 @@ const StoryDetails = () => {
           {/** Chapters List */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             <div className="lg:col-span-8 space-y-12">
-              <section className="bg-surface-container-low/30 rounded-3xl p-8 border border-outline-variant/5" id="chapters">
-                <div className="flex justify-between items-center mb-8">
+              <section className="bg-surface-container-low/30 rounded-2xl sm:rounded-3xl p-4 sm:p-8 border border-outline-variant/5" id="chapters">
+                <div className="flex flex-wrap justify-between items-center gap-3 mb-6 sm:mb-8">
                   <h3 className="text-2xl font-headline font-bold text-on-surface">
                     Capítulos
                   </h3>
@@ -183,18 +186,18 @@ const StoryDetails = () => {
                     onClick={() => navigate("/read", {
                       state: { chapterToRead: chapter }
                     })}
-                    key={chapter.id} className="group flex items-center justify-between p-6 rounded-2xl bg-surface-container-low border border-transparent hover:border-primary/20 transition-all cursor-default"
+                    key={chapter.id} className="group flex items-start sm:items-center justify-between gap-3 p-4 sm:p-6 rounded-2xl bg-surface-container-low border border-transparent hover:border-primary/20 transition-all cursor-default min-w-0"
                   >
-                    <div className="flex items-center gap-6">
-                      <span className="text-2xl font-display font-black text-on-surface-variant/50 italic">
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-6 min-w-0">
+                      <span className="text-xl sm:text-2xl font-display font-black text-on-surface-variant/50 italic shrink-0">
                         {String(chapter.order).padStart(2, '0')}
                       </span>
-                      <div>
-                        <h4 className={`text-lg ${chapter.title ? "font-bold text-on-surface group-hover:text-primary transition-colors" : "font-light text-on-surface-variant/40 italic"}`}>
-                          {renderWithoutFormat(JSON.parse(chapter.title))}
+                      <div className="min-w-0">
+                        <h4 className={`text-base sm:text-lg break-words ${chapter.title ? "font-bold text-on-surface group-hover:text-primary transition-colors" : "font-light text-on-surface-variant/40 italic"}`}>
+                          {renderWithoutFormat(parseTiptapContent(chapter.title))}
                         </h4>
                         <p className="text-xs text-on-surface-variant">
-                          {chapter.hidden ? "Borrador" : "Publicado"} • Última Edición {chapter.updatedAt ? getLastModifiedTime(chapter.updatedAt) : "Nunca"} • {chapter.content ? (chapter.content.trim().length > 0 && countTotalWords(JSON.parse(chapter.content))) : 0} palabras
+                          {chapter.hidden ? "Borrador" : "Publicado"} • Última Edición {chapter.updatedAt ? getLastModifiedTime(chapter.updatedAt) : "Nunca"} • {chapter.content ? countTotalWords(parseTiptapContent(chapter.content)) : 0} palabras
                         </p>
                       </div>
                     </div>
@@ -216,52 +219,9 @@ const StoryDetails = () => {
 
               </section>
               {/** Comments */}
-              <section className="space-y-8" id="comments">
-                <div className="flex items-center gap-4">
-                  <h3 className="text-2xl font-headline font-bold text-on-surface">
-                    Opiniones de Lectores
-                  </h3>
-                  <div className="flex-1 h-px bg-outline-variant/10"> </div>
-                </div>
-                { authUser && (
-                  <div className="bg-surface-container-low rounded-3xl p-6 border border-outline-variant/5">
-                    <textarea
-                      className="w-full bg-surface-container-lowest border-none rounded-2xl p-4 text-on-surface placeholder:text-on-surface-variant/40 focus:ring-1 focus:ring-primary/20 min-h-25 resize-none mb-4 focus:outline-none"
-                      placeholder="Escribe tus pensamientos..."
-                    >
-                    </textarea>
-                    <div className="flex justify-end items-center">
-                      <button className="bg-primary text-on-primary px-6 py-2 rounded-full font-bold hover:scale-105 transition-transform cursor-pointer">
-                        Publicar
-                      </button>
-                    </div>
-                  </div>
-                )}
-                <div className="space-y-6">
-                  <div className="flex gap-4">
-                    <img
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAViHy49kRFM-I-4243T5qCLN9P6g39st7Ga3crtZ9EIwL6eXENC7s3EmTswArbc0Ib-Cv_WLjgk2Iosff-dDwh0t4ru4WYcaDneUrMJLdk34gpq8wdV9rJQLnArmfxpoXwLZuoxleVoKCMSVrgz-0eF4hf5RvL324VPJ4mFu9p1cMg7sBbF-1sSYt9DK5KoboTR0p1-RA_sC2pWBdvEsleMHR33a89ETxr1K6CDUX-UeVYKWjJ55V9PAaqp_B7vxzd7KqR8MF2U0Q"
-                      alt="Imágen de Perfil"
-                      className="w-12 h-12 rounded-full object-cover shrink-0"
-                    />
-                    <div className="flex-1 bg-surface-container-low/40 rounded-2xl p-5 border border-outline-variant/5">
-                      <div className="flex justify-between items-center mb-2">
-                        <h5 className="font-bold text-on-surface">
-                          NombreUsuario
-                        </h5>
-                        <span className="text-xs text-on-surface-variant">
-                          Hace una hora
-                        </span>
-                      </div>
-                      <p
-                        className="text-on-surface-variant leading-relaxed"
-                      >
-                        Ejemplo Comentario...
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </section>
+              <div id="comments">
+                {story && <CommentsSection key={story.id} storyId={story.id} />}
+              </div>
             </div>
             {/** Story Metadata */}
             <div className="lg:col-span-4 space-y-8">

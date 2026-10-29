@@ -46,7 +46,7 @@ const ImageCropperModal = ({ image, onCropComplete, onCancel, loading, aspect }:
 
   return (
     <div className="fixed inset-0 z-100 bg-black/90 flex flex-col items-center justify-center p-4">
-        <div className="relative w-full max-w-lg aspect-square bg-search-bg rounded-lg overflow-hidden">
+        <div className="relative w-full max-w-lg max-h-[65dvh] aspect-square bg-search-bg rounded-lg overflow-hidden">
             <Cropper
                 image={image}
                 crop={crop}

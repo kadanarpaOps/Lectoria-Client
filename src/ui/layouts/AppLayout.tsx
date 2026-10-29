@@ -27,12 +27,18 @@ function ProtectedRoute({ children, adminOnly = false }: { children: ReactNode; 
   return children;
 }
 
+function AuthenticatedRedirect({ children }: { children: ReactNode }) {
+  const { authUser, loading } = useAuth();
+  if (loading) return <div className="flex min-h-screen items-center justify-center"><div className="loading-button" /></div>;
+  return authUser ? <Navigate to="/profile" replace /> : children;
+}
+
 export default function AppLayout() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/auth" element={<Auth />} />
+        <Route path="/" element={<AuthenticatedRedirect><LandingPage /></AuthenticatedRedirect>} />
+        <Route path="/auth" element={<AuthenticatedRedirect><Auth /></AuthenticatedRedirect>} />
         <Route path="/recovery-pass" element={<RecoveryPassword />} />
         <Route path="/auth/verify-registration" element={<RegistrationVerification />} />
         <Route element={<MainLayout />}>

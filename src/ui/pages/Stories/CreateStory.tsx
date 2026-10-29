@@ -144,7 +144,7 @@ const CreateStory = () => {
             INK
           </span>
         </div>
-        <header className="flex justify-between items-center w-full px-8 py-6 z-40 bg-surface/80">
+        <header className="flex justify-between items-center w-full px-4 sm:px-8 py-4 sm:py-6 z-40 bg-surface/80">
           <div className="flex items-center gap-4">
             <span className="font-headline font-semibold text-2xl tracking-tight text-primary">
               Lectoria
@@ -163,8 +163,8 @@ const CreateStory = () => {
             </div>
           </div>
         </header>
-        <div className="max-w-6xl mx-auto px-8 py-12">
-          <div className="flex flex-col lg:flex-row gap-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
             <aside className="w-full lg:w-1/3 flex flex-col items-center">
               <div
                 className="relative group w-full max-w-75 aspect-2/3 rounded-xl glass-ghost flex flex-col items-center justify-center text-center p-8 bg-surface-container-low overflow-hidden transition-all hover:bg-surface-container-high"
@@ -217,7 +217,7 @@ const CreateStory = () => {
             {/** Main Form */}
             <section className="grow">
               <div className="mb-12">
-                <h2 className="font-headline font-extrabold text-5xl text-on-surface tracking-tighter mb-4">
+                <h2 className="font-headline font-extrabold text-4xl sm:text-5xl text-on-surface tracking-tighter mb-4">
                   Nueva Historia
                 </h2>
                 <div className="h-1 w-20 bg-primary rounded-full"></div>
@@ -364,18 +364,18 @@ const CreateStory = () => {
                     </div>
                   )}
                 </div>
-                <div className="pt-5 flex items-center justify-end border-t border-outline-variant/10">
+                <div className="pt-5 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 border-t border-outline-variant/10">
                   {
                     (!loading || !isSubmitting) ? (
                       <>
                         <button
                           onClick={() => navigate(-1)}
-                          className="text-on-surface-variant font-semibold px-8 py-4 mr-6 hover:text-primary transition-colors cursor-pointe cursor-pointer"
+                          className="text-on-surface-variant font-semibold px-6 py-3 sm:px-8 sm:py-4 sm:mr-3 hover:text-primary transition-colors cursor-pointer"
                         >
                           Cancelar
                         </button>
                         <button
-                          className="bg-primary-container text-on-primary-container px-12 py-4 rounded-full font-bold text-lg tracking-tight hover:scale-95 transition-transform cursor-pointer"
+                          className="bg-primary-container text-on-primary-container px-8 py-3 sm:px-12 sm:py-4 rounded-full font-bold text-base sm:text-lg tracking-tight hover:scale-95 transition-transform cursor-pointer"
                           type="submit"
                         >
                           Crear Historia

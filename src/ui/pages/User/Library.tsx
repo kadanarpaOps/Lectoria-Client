@@ -26,7 +26,7 @@ export default function Library() {
             <div className="min-h-screen pt-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="mb-12">
-                        <div className="flex space-x-4">
+                        <div className="flex flex-wrap gap-x-4">
                             <button
                                 onClick={() => handleModeChange("mine")}
                                 className={`pb-4 px-2 font-semibold text-lg transition ${

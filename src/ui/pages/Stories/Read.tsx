@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import type { ChapterInfo } from "../../../core/domain/models/chapters/ChapterModel";
-import { renderWithFormat } from "../utils/renderTiptap.util";
+import { parseTiptapContent, renderWithFormat } from "../utils/renderTiptap.util";
+import CommentsSection from "../../components/stories/CommentsSection";
 
 const Read = () => {
 
@@ -24,20 +25,23 @@ const Read = () => {
   }, [chapterToRead]);
 
   return (
-    <main className="grow flex flex-col items-center px-12 pb-12 writing-canvas">
+    <main className="grow flex flex-col items-center px-4 sm:px-8 lg:px-12 pb-12 writing-canvas">
       { readingChapter ? (
         <>
           <div
-            className="text-5xl font-bold text-global min-h-fit w-full max-w-3xl"
+            className="text-3xl sm:text-5xl font-bold text-global min-h-fit w-full max-w-3xl break-words"
           >
             <div
-              dangerouslySetInnerHTML={{ __html: renderWithFormat(JSON.parse(readingChapter.title)) }}
+              dangerouslySetInnerHTML={{ __html: renderWithFormat(parseTiptapContent(readingChapter.title)) }}
             ></div>
           </div>
           <div
-            className="min-h-fit w-full max-w-3xl"
-            dangerouslySetInnerHTML={{ __html: renderWithFormat(JSON.parse(readingChapter.content)) }}
+            className="min-h-fit w-full max-w-3xl break-words"
+            dangerouslySetInnerHTML={{ __html: renderWithFormat(parseTiptapContent(readingChapter.content)) }}
           ></div>
+          <div className="w-full max-w-3xl mt-12">
+            <CommentsSection key={readingChapter.id} chapterId={readingChapter.id} title="Comentarios del capítulo" />
+          </div>
         </>
       ) : (
         <h1 className="text-3xl">No estás leyendo nada</h1>

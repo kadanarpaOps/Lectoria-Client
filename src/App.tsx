@@ -4,6 +4,7 @@ import UserProvider from "./ui/context/providers/UserProvider";
 import AppLayout from "./ui/layouts/AppLayout";
 import StoriesProvider from "./ui/context/providers/StoriesProvider";
 import ChaptersProvider from "./ui/context/providers/ChaptersProvider";
+import CommentsProvider from "./ui/context/providers/CommentsProvider";
 
 function App() {
   return (
@@ -12,7 +13,9 @@ function App() {
         <AuthProvider>
           <StoriesProvider>
             <ChaptersProvider>
-              <AppLayout />
+              <CommentsProvider>
+                <AppLayout />
+              </CommentsProvider>
             </ChaptersProvider>
           </StoriesProvider>
         </AuthProvider>

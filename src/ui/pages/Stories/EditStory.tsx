@@ -17,7 +17,7 @@ import SelectNewStatusModal from "../../components/stories/SelectNewStatusModal"
 import { useChapters } from "../../hooks/useChapters";
 import type { PageResponse } from "../../../core/domain/models/common/PaginationModels";
 import type { ChapterInfo } from "../../../core/domain/models/chapters/ChapterModel";
-import { countTotalWords, renderWithoutFormat } from "../utils/renderTiptap.util";
+import { countTotalWords, parseTiptapContent, renderWithoutFormat } from "../utils/renderTiptap.util";
 
 type UpdateFormValues = z.infer<typeof updateSchema>;
 
@@ -220,9 +220,9 @@ const EditStory = () => {
       )}
 
       { story && !modifiedStory ? (
-        <div className="p-8 md:p-14 md:px-30 max-w-7xl mx-auto space-y-16">
+        <div className="w-full min-w-0 p-4 sm:p-8 lg:p-14 xl:px-30 max-w-7xl mx-auto space-y-10 sm:space-y-16">
           <section className="relative">
-            <nav className="fixed top-26 right-20 flex flex-col gap-2 z-10">
+            <nav className="hidden xl:flex fixed top-26 right-8 2xl:right-20 flex-col gap-2 z-10">
               <a href="#info" className="p-4 rounded-xl text-on-surface-variant hover:bg-primary-container hover:text-on-primary hover:shadow-lg hover:shadow-primary-container/10 transition-all" title="Basic Info">
                 <Info size={20} />
               </a>
@@ -269,13 +269,13 @@ const EditStory = () => {
                 </div>
               </div>
               {/** Modify Title and Description */}
-              <div className="flex-1 space-y-8">
+              <div className="flex-1 min-w-0 w-full space-y-8">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     {!isEditingTitle ? (
                       <h1
                         onClick={() => setIsEditingTitle(true)}
-                        className="text-5xl font-display font-extrabold py-3 tracking-tight text-fujiWhite group cursor-pointer inline-flex items-center gap-4 transition-all"
+                        className="text-3xl sm:text-5xl font-display font-extrabold py-3 tracking-tight text-fujiWhite group cursor-pointer inline-flex items-start gap-3 transition-all break-words max-w-full"
                       >
                         {story.title}
                         <span className="text-primary/40 group-hover:text-primary transition-colors">
@@ -283,11 +283,11 @@ const EditStory = () => {
                         </span>
                       </h1>
                     ) : (
-                      <div className="inline-flex items-center gap-4 w-130">
+                      <div className="inline-flex items-center gap-2 sm:gap-4 w-full max-w-3xl min-w-0">
                         <input
                           {...register("title")}
                           type="text"
-                          className="text-5xl font-display font-extrabold tracking-tight bg-transparent border-b-2 border-global/60 text-fujiWhite outline-none w-full animate-in fade-in duration-300"
+                          className="text-3xl sm:text-5xl font-display font-extrabold tracking-tight bg-transparent border-b-2 border-global/60 text-fujiWhite outline-none w-full min-w-0 animate-in fade-in duration-300"
                         />
                         <div className="flex gap-2">
                           <button
@@ -312,7 +312,7 @@ const EditStory = () => {
                       </div>
                     )}
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-140">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 w-full max-w-3xl">
                     <button
                       onClick={() => setEditingGenreOrSubgenre("genre")}
                       className="cursor-pointer flex items-center justify-between bg-surface-container-low px-6 py-4 rounded-xl hover:bg-surface-container-high transition-colors text-on-surface" type="button"
@@ -340,7 +340,7 @@ const EditStory = () => {
                 {!isEditingDescription ? (
                   <div
                     onClick={() => setIsEditingDescription(true)}
-                    className="relative group cursor-pointer p-6 rounded-2xl glass-panel w-140 h-55 overflow-y-scroll custom-scrollbar-edit"
+                    className="relative group cursor-pointer p-4 sm:p-6 rounded-2xl glass-panel w-full max-w-3xl min-h-55 max-h-80 overflow-y-auto custom-scrollbar-edit"
                   >
                     <h3 className="text-on-surface-variant font-bold text-md uppercase tracking-widest mb-4 flex items-center justify-between">
                       Sinopsis
@@ -353,7 +353,7 @@ const EditStory = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="relative p-6 rounded-2xl glass-panel w-140 h-55 border border-primary/50">
+                  <div className="relative p-4 sm:p-6 rounded-2xl glass-panel w-full max-w-3xl min-h-55 border border-primary/50">
                     <h3 className="text-on-surface-variant font-bold text-md uppercase tracking-widest mb-4 flex items-center justify-between">
                       Sinopsis
                       <div className="inline-flex gap-4">
@@ -385,7 +385,7 @@ const EditStory = () => {
                     />
                   </div>
                 )}
-                <div className="grid grid-cols-2 md:grid-cols-5 px-6 w-140">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 px-2 sm:px-6 w-full max-w-3xl">
                   <div className="space-y-1">
                     <span className="text-xs text-on-surface-variant/60 uppercase tracking-tighter font-bold">
                       Capítulos
@@ -422,8 +422,8 @@ const EditStory = () => {
               </div>
             </div>
             <div className="p-5 mt-8">
-              <div className="grid grid-cols-12">
-                <div className="col-span-4 justify-center">
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                <div className="sm:col-span-4 justify-center">
                   <h3 className="text-md text-on-surface-variant/60 tracking-tighter font-bold mb-2">
                     Visibilidad
                   </h3>
@@ -445,7 +445,7 @@ const EditStory = () => {
                     </button>
                   </div>
                 </div>
-                <div className="col-span-8 justify-center">
+                <div className="sm:col-span-8 justify-center">
                   <h3 className="text-md text-on-surface-variant/60 tracking-tighter font-bold mb-2">
                     Tags
                   </h3>
@@ -454,7 +454,7 @@ const EditStory = () => {
             </div>
           </section>
           <section className="space-y-8" id="chapters">
-            <div className="flex items-end justify-between border-b border-outline-variant/10 pb-6">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-outline-variant/10 pb-6">
               <div>
                 <h2 className="text-3xl font-display font-bold text-on-surface mb-2">
                   Capítulos
@@ -465,7 +465,7 @@ const EditStory = () => {
               </div>
               <button
                 onClick={() => setListByNewestFirst(!listByNewestFirst)}
-                className="flex items-center gap-2 hover:bg-inverse-on-surface transition-all duration-300 p-1 rounded-lg cursor-pointer"
+                className="flex items-center gap-2 hover:bg-inverse-on-surface transition-all duration-300 p-2 rounded-lg cursor-pointer self-start"
               >
                 {listByNewestFirst ? "Traer más viejos" : "Traer más nuevos"}
                 <ArrowBigDown
@@ -478,7 +478,7 @@ const EditStory = () => {
                 <button
                   disabled={loadingChapters}
                   onClick={() => onChapterCreation()}
-                  className="bg-primary-container text-on-primary-container px-6 py-4 rounded-full font-bold flex items-center gap-3 hover:scale-95 transition-all cursor-pointer"
+                  className="bg-primary-container text-on-primary-container px-5 py-3 sm:px-6 sm:py-4 rounded-full font-bold flex items-center gap-3 hover:scale-95 transition-all cursor-pointer self-start sm:self-auto"
                 >
                   <span>
                     <Plus size={20} />
@@ -494,21 +494,21 @@ const EditStory = () => {
             <div className="grid gap-4">
               { chapters && chapters.data.length > 0 ? (
                 chapters.data.map(chapter => (
-                  <div key={chapter.id} className="group flex items-center justify-between p-6 rounded-2xl bg-surface-container-low border border-transparent hover:border-primary/20 transition-all cursor-default">
-                    <div className="flex items-center gap-6">
-                      <span className="text-2xl font-display font-black text-on-surface-variant/50 italic">
+                  <div key={chapter.id} className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-6 rounded-2xl bg-surface-container-low border border-transparent hover:border-primary/20 transition-all cursor-default">
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-6 min-w-0">
+                      <span className="text-xl sm:text-2xl font-display font-black text-on-surface-variant/50 italic shrink-0">
                         {String(chapter.order).padStart(2, '0')}
                       </span>
-                      <div>
+                      <div className="min-w-0">
                         <h4 className={`text-lg ${chapter.title ? "font-bold text-on-surface group-hover:text-primary transition-colors" : "font-light text-on-surface-variant/40 italic"}`}>
-                          {chapter.title ? (renderWithoutFormat(JSON.parse(chapter.title))) : "Sin título"}
+                          {chapter.title ? renderWithoutFormat(parseTiptapContent(chapter.title)) : "Sin título"}
                         </h4>
                         <p className="text-xs text-on-surface-variant">
-                          {chapter.hidden ? "Borrador" : "Publicado"} • Última Edición {chapter.updatedAt ? getLastModifiedTime(chapter.updatedAt) : "Nunca"} • {chapter.content ? (chapter.content.trim().length > 0 && countTotalWords(JSON.parse(chapter.content))) : 0} palabras
+                          {chapter.hidden ? "Borrador" : "Publicado"} • Última Edición {chapter.updatedAt ? getLastModifiedTime(chapter.updatedAt) : "Nunca"} • {chapter.content ? countTotalWords(parseTiptapContent(chapter.content)) : 0} palabras
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2 sm:gap-4 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => navigate("/write", {
                           state: { chapterToEdit: chapter }

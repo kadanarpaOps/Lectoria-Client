@@ -54,10 +54,10 @@ export default function Users() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-6 py-10">
-      <header className="mb-8 rounded-3xl border border-toolbar-bg/10 bg-background-global p-7">
+    <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-6 sm:py-10">
+      <header className="mb-8 rounded-3xl border border-toolbar-bg/10 bg-background-global p-5 sm:p-7">
         <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-high-enfasis"><UsersRound size={17} /> Comunidad</p>
-        <h1 className="mt-2 text-3xl font-bold text-global">Usuarios de Lectoria</h1>
+        <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-global">Usuarios de Lectoria</h1>
         <p className="mt-3 text-several-light">Encuentra lectores y escritores por nombre o correo.</p>
         <form onSubmit={applyFilters} className="mt-6 grid gap-3 md:grid-cols-[1fr_1fr_auto_auto]">
           <label className="flex items-center gap-2 rounded-xl bg-inputs-bg px-4 py-3">
@@ -84,7 +84,7 @@ export default function Users() {
         ) : users.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-toolbar-bg/20 p-10 text-center text-several-light">No hay resultados para mostrar.</div>
         ) : users.map((user) => (
-          <article key={user.userId} className="flex items-center gap-4 rounded-3xl border border-toolbar-bg/10 bg-background-global p-5">
+          <article key={user.userId} className="flex items-center gap-3 sm:gap-4 rounded-3xl border border-toolbar-bg/10 bg-background-global p-4 sm:p-5">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-inputs-bg">
               {user.userDetails?.profileImageUrl
                 ? <img src={user.userDetails.profileImageUrl} alt={`Perfil de ${user.username}`} className="h-full w-full object-cover" />

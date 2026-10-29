@@ -57,35 +57,35 @@ export default function AccountSettings() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-10">
+    <main className="mx-auto w-full max-w-4xl px-4 sm:px-6 py-6 sm:py-10">
       <header className="mb-8">
         <p className="text-sm font-semibold uppercase tracking-widest text-high-enfasis">Cuenta</p>
-        <h1 className="mt-2 text-3xl font-bold text-global">Seguridad y datos personales</h1>
+        <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-global">Seguridad y datos personales</h1>
         <p className="mt-3 text-several-light">Confirma los cambios sensibles con el código de un solo uso enviado a tu correo actual.</p>
       </header>
 
       <div className="space-y-5">
-        <form onSubmit={updateUsername} className="space-y-4 rounded-3xl border border-toolbar-bg/10 bg-background-global p-6">
+        <form onSubmit={updateUsername} className="space-y-4 rounded-3xl border border-toolbar-bg/10 bg-background-global p-4 sm:p-6">
           <h2 className="text-xl font-semibold text-global">Nombre de usuario</h2>
           <input required minLength={4} maxLength={30} pattern="[a-z0-9][a-z0-9._-]{3,29}" value={newUsername} onChange={(event) => setNewUsername(event.target.value)} className="w-full rounded-xl bg-inputs-bg px-4 py-3 text-global outline-none focus:ring-2 focus:ring-high-enfasis" />
           <button type="submit" disabled={saving} className="rounded-full bg-high-enfasis px-5 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">Guardar nombre</button>
         </form>
 
-        <form onSubmit={(event) => { event.preventDefault(); setVerificationType("CHANGE_EMAIL"); }} className="space-y-4 rounded-3xl border border-toolbar-bg/10 bg-background-global p-6">
+        <form onSubmit={(event) => { event.preventDefault(); setVerificationType("CHANGE_EMAIL"); }} className="space-y-4 rounded-3xl border border-toolbar-bg/10 bg-background-global p-4 sm:p-6">
           <h2 className="text-xl font-semibold text-global">Cambiar correo</h2>
           <p className="text-sm text-several-light">Correo actual: {authUser.email}</p>
           <input required type="email" pattern="[\w.%+-]+@[A-Za-z\d.-]{2,}\.[a-z]{2,6}" value={newEmail} onChange={(event) => setNewEmail(event.target.value)} placeholder="Nuevo correo electrónico" className="w-full rounded-xl bg-inputs-bg px-4 py-3 text-global outline-none focus:ring-2 focus:ring-high-enfasis" />
           <button type="submit" className="rounded-full bg-high-enfasis px-5 py-3 font-semibold text-white transition hover:opacity-90">Solicitar código</button>
         </form>
 
-        <form onSubmit={(event) => { event.preventDefault(); setVerificationType("CHANGE_PASSWORD"); }} className="space-y-4 rounded-3xl border border-toolbar-bg/10 bg-background-global p-6">
+        <form onSubmit={(event) => { event.preventDefault(); setVerificationType("CHANGE_PASSWORD"); }} className="space-y-4 rounded-3xl border border-toolbar-bg/10 bg-background-global p-4 sm:p-6">
           <h2 className="text-xl font-semibold text-global">Cambiar contraseña</h2>
           <input required type="password" minLength={7} maxLength={30} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{7,30}" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="Nueva contraseña" className="w-full rounded-xl bg-inputs-bg px-4 py-3 text-global outline-none focus:ring-2 focus:ring-high-enfasis" />
           <p className="text-xs text-several-light">Usa entre 7 y 30 caracteres con minúscula, mayúscula, número y símbolo.</p>
           <button type="submit" className="rounded-full bg-high-enfasis px-5 py-3 font-semibold text-white transition hover:opacity-90">Solicitar código</button>
         </form>
 
-        <section className="rounded-3xl border border-red-500/20 bg-red-500/5 p-6">
+        <section className="rounded-3xl border border-red-500/20 bg-red-500/5 p-4 sm:p-6">
           <h2 className="text-xl font-semibold text-global">Desactivar cuenta</h2>
           <p className="my-3 text-sm text-several-light">La cuenta se desactivará después de confirmar el código enviado a tu correo.</p>
           <button type="button" onClick={() => setVerificationType("DISABLE_ACCOUNT")} className="rounded-full border border-red-400/40 px-5 py-3 font-semibold text-red-300 transition hover:bg-red-500/10">Continuar con la desactivación</button>

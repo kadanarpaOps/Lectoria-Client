@@ -60,10 +60,10 @@ export default function AdminUsers() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-6 py-10">
+    <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-6 sm:py-10">
       <header className="mb-8">
         <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-high-enfasis"><Shield size={16} /> Administración</p>
-        <h1 className="mt-2 text-3xl font-bold text-global">Usuarios de Lectoria</h1>
+        <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-global">Usuarios de Lectoria</h1>
         <p className="mt-3 text-several-light">Consulta usuarios y gestiona sus roles y estado de cuenta.</p>
       </header>
       <form onSubmit={(event) => { event.preventDefault(); setPage(0); setUsernameFilter(username.trim()); setEmailFilter(email.trim()); }} className="mb-6 grid gap-3 rounded-3xl border border-toolbar-bg/10 bg-background-global p-5 md:grid-cols-[1fr_1fr_auto_auto]">

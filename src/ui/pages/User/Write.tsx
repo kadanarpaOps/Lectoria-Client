@@ -12,6 +12,7 @@ import type { EditingChapter } from '../../../core/domain/models/chapters/Chapte
 import { useAlert } from '../../hooks/useAlert';
 import SaveActualEditionModal from '../../components/writing/SaveActualEditionModal';
 import LoadLastEditionModal from '../../components/writing/LoadLastEditionModal';
+import { parseTiptapContent } from "../utils/renderTiptap.util";
 
 const extensions = [
     TextStyleKit, StarterKit,
@@ -100,11 +101,11 @@ export default function Write() {
         },
         editorProps: {
             attributes: {
-                class: "text-5xl font-bold text-global outline-none min-h-fit",
+                class: "text-3xl sm:text-5xl font-bold text-global outline-none min-h-fit break-words",
             }
         },
         onFocus: () => setActiveEditor('title'),
-        content: editingChapter?.title ? (editingChapter.title.trim().length > 0 ? JSON.parse(editingChapter.title) : editingChapter.title) : "",
+        content: editingChapter?.title ? parseTiptapContent(editingChapter.title) : "",
     }, [editingChapter]);
 
     const editor = useEditor({
@@ -116,7 +117,7 @@ export default function Write() {
             }
         },
         onFocus: () => setActiveEditor('content'),
-        content: editingChapter ? (editingChapter.content.trim().length > 0 ? JSON.parse(editingChapter.content) : editingChapter.content) : "",
+        content: editingChapter ? parseTiptapContent(editingChapter.content) : "",
     }, [editingChapter]);
 
     const handleChapterSave = async (): Promise<boolean> => {
@@ -171,7 +172,7 @@ export default function Write() {
     }
 
     return (
-        <div className="grow flex flex-col items-center px-12 pb-12 writing-canvas">
+        <div className="grow flex flex-col items-center px-4 sm:px-8 lg:px-12 pb-28 sm:pb-12 writing-canvas min-w-0">
             {editingChapter && chapterToEdit && (
                 editingChapter.id !== chapterToEdit. id && (
                     <SaveActualEditionModal
@@ -194,7 +195,7 @@ export default function Write() {
                 </div>
             </div>
             <SpeechReader editor={editor} />
-            <div className="fixed bottom-8 right-12 flex items-center space-x-4 bg-search-bg/80 px-5 py-3 rounded-2xl ghost-border backdrop-opacity-95 shadow-2xl z-40">
+            <div className="fixed bottom-3 right-3 sm:bottom-8 sm:right-6 lg:right-12 flex items-center space-x-3 sm:space-x-4 bg-search-bg/90 px-3 sm:px-5 py-2 sm:py-3 rounded-2xl ghost-border backdrop-opacity-95 shadow-2xl z-40">
                 <div className="flex flex-col items-end">
                     <span className="text-[10px] text-several-light uppercase tracking-tighter">
                         Palabras

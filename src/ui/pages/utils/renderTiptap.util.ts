@@ -11,6 +11,29 @@ const extensions = [
   })
 ];
 
+export const parseTiptapContent = (value: string): JSONContent => {
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      "type" in parsed &&
+      parsed.type === "doc"
+    ) {
+      return parsed as JSONContent;
+    }
+  } catch {
+    // Older chapters can contain plain text rather than serialized TipTap JSON.
+  }
+
+  return {
+    type: "doc",
+    content: value
+      ? [{ type: "paragraph", content: [{ type: "text", text: value }] }]
+      : [{ type: "paragraph" }],
+  };
+};
+
 /**
  * Method 1: Converts Tiptap JSON into raw string content
  * @param {Object} jsonDoc - The Tiptap JSON object

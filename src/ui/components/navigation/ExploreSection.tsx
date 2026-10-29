@@ -104,7 +104,7 @@ const ExploreSection = ({ loadStories, loading, routeAction }: Props) => {
                 repeatedStatus={[currentStatus ? currentStatus! : ""]}
             />
         )}
-        <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
             <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full justify-center">
                 <div className="col-span-1">
                     <label className="text-md font-semibold tracking-wide text-primary/80 uppercase ml-3 mb-3 flex items-center gap-3">
@@ -217,13 +217,13 @@ const ExploreSection = ({ loadStories, loading, routeAction }: Props) => {
                 </div>
             </form>
         </div>
-        <div className="px-8 py-4">
+        <div className="px-4 sm:px-6 lg:px-8 py-4">
             <div>
                 { resultStories && !loading && resultStories.data.length > 0 ? (
-                    <div className="grid grid-cols-6 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 sm:gap-6">
                         {resultStories.data.map(story => (
                             <div
-                                className="col-span-1"
+                                className="col-span-1 min-w-0"
                                 key={story.id}
                                 onClick={() => navigate(`${routeAction}${story.id}`)}
                             >
@@ -236,7 +236,7 @@ const ExploreSection = ({ loadStories, loading, routeAction }: Props) => {
                                 />
                             </div>
                         ))}
-                        <div className="col-span-6">
+                        <div className="col-span-full">
                             <div className="flex items-center justify-center gap-2 mt-14">
                               {/** Previous Navigation */}
                               <button
