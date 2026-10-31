@@ -18,7 +18,7 @@ function LandingNavbar() {
             <div className="grid grid-cols-[1fr_auto] justify-between items-center gap-2 px-3 sm:px-8 h-14">
                 {/* Izquierda — Logo */}
                 <div className="flex items-center gap-3">
-                    <img src="/Lectoria-favicon.svg" alt="Lectoria" className="w-7 h-7 opacity-80" />
+                    <img src="/lectoria-favicon.svg" alt="Lectoria" className="w-7 h-7 opacity-80" />
                     <span className="text-[#1a2030] font-bold text-sm sm:text-lg tracking-widest uppercase">Lectoria</span>
                 </div>
 
@@ -351,7 +351,7 @@ function Footer() {
         <footer className="bg-surface-container-lowest py-8 sm:py-10 px-4 sm:px-8 border-t border-[#c8b97a]/08">
             <div className="max-w-275 mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-2">
-                    <img src="/Lectoria-favicon.svg" alt="Lectoria" className="w-5 h-5 opacity-50" />
+                    <img src="/lectoria-favicon.svg" alt="Lectoria" className="w-5 h-5 opacity-50" />
                     <span className="text-[#9a9080] text-sm tracking-widest uppercase font-light">Lectoria</span>
                 </div>
                 <p className="text-[#6a6458] text-xs tracking-wide font-light">

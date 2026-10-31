@@ -1,5 +1,6 @@
 import type {
   RegisterUserRequest,
+  ResetPasswordRequest,
   UpdateEmailRequest,
   UpdatePasswordRequest,
   UpdateUsernameRequest,
@@ -22,6 +23,10 @@ export interface UserProfileResponse {
 
 export const registerUserRequest = async (user: RegisterUserRequest): Promise<void> => {
   await httpClient.post("users", user);
+};
+
+export const resetUserPasswordRequest = async (request: ResetPasswordRequest): Promise<void> => {
+  await httpClient.post("users/forgot-password", request);
 };
 
 export const getUserProfileRequest = async (): Promise<UserProfileResponse> => {

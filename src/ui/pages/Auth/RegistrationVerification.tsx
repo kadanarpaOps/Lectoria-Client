@@ -34,12 +34,14 @@ export default function RegistrationVerification() {
       description="Introduce el código enviado al correo con el que creaste tu cuenta."
       request={{
         username,
-        destinationEmail: email,
         verificationType: "VERIFY_REGISTRY",
       }}
       createIfMissing={false}
+      completeWhenVerified
+      maxRegenerations={1}
+      notFoundMessage="No encontramos una verificación de registro pendiente para esos datos."
       onVerified={async () => {
-        await verifyRegistrationRequest(username);
+        await verifyRegistrationRequest(username, email);
         navigate("/auth", { replace: true });
       }}
       onClose={() => navigate("/auth", { replace: true })}

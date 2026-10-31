@@ -13,15 +13,13 @@ export default function AccountSettings() {
   const [newUsername, setNewUsername] = useState(authUser?.username ?? "");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [verificationType, setVerificationType] = useState<VerificationType | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   if (!authUser) return null;
-
-  const baseRequest = {
-    destinationEmail: authUser.email,
-  };
 
   const updateUsername = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -42,6 +40,11 @@ export default function AccountSettings() {
     if (verificationType === "CHANGE_EMAIL") {
       await userService.updateEmail({ newEmail: newEmail.trim() });
     } else if (verificationType === "CHANGE_PASSWORD") {
+      if (newPassword !== confirmPassword) {
+        setPasswordError("Las contraseñas no coinciden.");
+        throw new Error("Passwords do not match");
+      }
+      setPasswordError(null);
       await userService.updatePassword({ newPassword });
     } else if (verificationType === "DISABLE_ACCOUNT") {
       await userService.disableAccount();
@@ -52,6 +55,7 @@ export default function AccountSettings() {
     setVerificationType(null);
     setNewEmail("");
     setNewPassword("");
+    setConfirmPassword("");
     setModifiedAuthUser(true);
     setMessage("Los cambios de tu cuenta se guardaron correctamente.");
   };
@@ -80,7 +84,6 @@ export default function AccountSettings() {
 
         <form onSubmit={(event) => { event.preventDefault(); setVerificationType("CHANGE_PASSWORD"); }} className="space-y-4 rounded-3xl border border-toolbar-bg/10 bg-background-global p-4 sm:p-6">
           <h2 className="text-xl font-semibold text-global">Cambiar contraseña</h2>
-          <input required type="password" minLength={7} maxLength={30} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{7,30}" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="Nueva contraseña" className="w-full rounded-xl bg-inputs-bg px-4 py-3 text-global outline-none focus:ring-2 focus:ring-high-enfasis" />
           <p className="text-xs text-several-light">Usa entre 7 y 30 caracteres con minúscula, mayúscula, número y símbolo.</p>
           <button type="submit" className="rounded-full bg-high-enfasis px-5 py-3 font-semibold text-white transition hover:opacity-90">Solicitar código</button>
         </form>
@@ -97,8 +100,41 @@ export default function AccountSettings() {
         <VerificationDialog
           key={verificationType}
           title={verificationType === "CHANGE_EMAIL" ? "Verifica el cambio de correo" : verificationType === "CHANGE_PASSWORD" ? "Verifica el cambio de contraseña" : "Verifica la desactivación"}
-          description="Introduce el código enviado al correo electrónico asociado a tu cuenta."
-          request={{ ...baseRequest, verificationType }}
+          description={verificationType === "CHANGE_EMAIL"
+            ? "Introduce el código enviado al nuevo correo que quieres asociar a tu cuenta."
+            : "Introduce el código enviado al correo electrónico asociado a tu cuenta."}
+          request={{
+            verificationType,
+            ...(verificationType === "CHANGE_EMAIL" ? { destinationEmail: newEmail.trim() } : {}),
+          }}
+          replaceIfDestinationMismatch={verificationType === "CHANGE_EMAIL"}
+          completeWhenVerified={verificationType === "DISABLE_ACCOUNT"}
+          verifiedContent={verificationType === "CHANGE_EMAIL"
+            ? (
+              <div className="space-y-4">
+                <p className="text-sm text-several-light">El nuevo correo quedó verificado. Confirma para guardarlo en tu cuenta.</p>
+                <button type="submit" className="w-full rounded-full bg-high-enfasis py-3.5 font-semibold text-white">
+                  Guardar nuevo correo
+                </button>
+              </div>
+            )
+            : verificationType === "CHANGE_PASSWORD"
+              ? (
+                <>
+                  <label className="block text-xs font-semibold uppercase tracking-widest text-several-light">
+                      Nueva contraseña
+                      <input required type="password" minLength={7} maxLength={30} pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{7,30}" value={newPassword} onChange={(event) => { setNewPassword(event.target.value); setPasswordError(null); }} autoComplete="new-password" className="mt-2 w-full rounded-xl bg-inputs-bg px-4 py-3 text-global outline-none focus:ring-2 focus:ring-high-enfasis" />
+                  </label>
+                  <label className="block text-xs font-semibold uppercase tracking-widest text-several-light">
+                      Confirmar contraseña
+                      <input required type="password" value={confirmPassword} onChange={(event) => { setConfirmPassword(event.target.value); setPasswordError(null); }} autoComplete="new-password" className="mt-2 w-full rounded-xl bg-inputs-bg px-4 py-3 text-global outline-none focus:ring-2 focus:ring-high-enfasis" />
+                  </label>
+                  <p className="text-xs text-several-light">Usa entre 7 y 30 caracteres con minúscula, mayúscula, número y símbolo.</p>
+                  {passwordError && <p role="alert" className="text-sm text-red-400">{passwordError}</p>}
+                  <button type="submit" className="w-full rounded-full bg-high-enfasis py-3.5 font-semibold text-white">Guardar nueva contraseña</button>
+                </>
+              )
+              : undefined}
           onVerified={finishVerification}
           onClose={() => setVerificationType(null)}
         />

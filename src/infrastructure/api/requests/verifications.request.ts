@@ -1,3 +1,4 @@
+import { isAxiosError } from "axios";
 import type {
   VerificationExistence,
   VerificationRequest,
@@ -21,13 +22,29 @@ export const getVerificationExistenceRequest = async (
   request: Omit<VerificationRequest, "destinationEmail">,
 ): Promise<VerificationExistence> => {
   const { verificationType, username, userEmail, optionalUserId } = request;
-  const response = await httpClient.get("verifications/verify/verification-existence", {
-    params: {
-      ...(username ? { username } : {}),
-      ...(userEmail ? { email: userEmail } : {}),
-      ...(optionalUserId ? { optionalUserId } : {}),
-      verificationType,
-    },
-  });
-  return response.data;
+  try {
+    const response = await httpClient.get("verifications/verify/verification-existence", {
+      params: {
+        ...(username ? { username } : {}),
+        ...(userEmail ? { email: userEmail } : {}),
+        ...(optionalUserId ? { optionalUserId } : {}),
+        verificationType,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 404) {
+      return {
+        exists: false,
+        verificationStatus: null,
+        expirationDate: null,
+        codeExpirationDate: null,
+        expirationEpochMillis: null,
+        codeExpirationEpochMillis: null,
+        destinationEmail: null,
+        resendLimitReached: false,
+      };
+    }
+    throw error;
+  }
 };

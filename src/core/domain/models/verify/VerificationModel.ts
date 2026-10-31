@@ -22,4 +22,9 @@ export interface VerificationExistence {
   exists: boolean;
   verificationStatus: "PENDING" | "VERIFIED" | null;
   expirationDate: string | null;
+  codeExpirationDate: string | null;
+  expirationEpochMillis?: number | null;
+  codeExpirationEpochMillis?: number | null;
+  destinationEmail?: string | null;
+  resendLimitReached?: boolean;
 }

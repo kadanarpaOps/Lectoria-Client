@@ -38,4 +38,10 @@ export interface UpdatePasswordRequest {
   newPassword: string;
 }
 
+export interface ResetPasswordRequest {
+  username?: string;
+  userEmail?: string;
+  newPassword: string;
+}
+
 export type UserInfo = UserModel;

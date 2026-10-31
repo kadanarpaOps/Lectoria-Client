@@ -3,7 +3,52 @@ import LoginLeftPanel from "../../components/decorative/LoginLeftPanel";
 import LoginForm from "./forms/LoginForm";
 import RegisterLeftPanel from "../../components/decorative/RegisterLeftPanel";
 import RegisterForm from "./forms/RegisterForm";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
+
+function VerificationOrb() {
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  return (
+    <div
+      className="fixed bottom-5 left-5 z-40"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setOpen(false);
+      }}
+    >
+      <div className={`absolute bottom-16 left-0 w-56 origin-bottom-left rounded-2xl border border-[#c8b97a]/30 bg-background-global p-2 shadow-2xl transition duration-300 ${open ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none translate-y-2 scale-95 opacity-0"}`}>
+        <button
+          type="button"
+          onClick={() => navigate("/recovery-pass?mode=registry")}
+          className="w-full rounded-xl px-4 py-3 text-left text-sm font-semibold text-global transition hover:bg-high-enfasis/15"
+        >
+          Continuar registro
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate("/recovery-pass")}
+          className="w-full rounded-xl px-4 py-3 text-left text-sm font-semibold text-global transition hover:bg-high-enfasis/15"
+        >
+          Olvidé mi contraseña
+        </button>
+      </div>
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-label="Abrir opciones de verificación"
+        onClick={() => setOpen((value) => !value)}
+        className="group relative flex h-14 w-14 items-center justify-center rounded-full border border-[#e6d79d]/80 bg-[radial-gradient(circle_at_30%_25%,#fff5bf_0%,#d1b95c_22%,#806b36_55%,#242437_78%)] shadow-[0_0_24px_rgba(200,185,122,0.5)] transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-high-enfasis"
+      >
+        <span className="absolute inset-1 rounded-full border border-white/40 animate-[spin_8s_linear_infinite]" />
+        <span className="absolute -inset-2 rounded-full border border-[#c8b97a]/20 animate-ping" />
+        <span className="relative text-xl text-[#fff5bf] drop-shadow">✦</span>
+      </button>
+    </div>
+  );
+}
 
 export default function Auth() {
 
@@ -69,6 +114,7 @@ export default function Auth() {
           </div>
         </section>
       </div>
+      <VerificationOrb />
     </main>
   );
 }
