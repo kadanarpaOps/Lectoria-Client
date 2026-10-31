@@ -12,10 +12,11 @@ interface Props {
 const SelectCategoryModal = ({ repeatedGenres, onCancel, onSelect }: Props) => {
 
   // Use Stories
-  const { loading, genres } = useStories();
+  const { genres, genresLoaded, genresLoading, genresError, loadGenres } = useStories();
   // Search Genre Dynamically
   const [ searchedGenre, setSearchedGenre ] = useState<string>("");
   const searchedGenreRef = useRef<HTMLInputElement>(null);
+  const genresRequestStarted = useRef(false);
   const handleSearchedGenreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchedGenre(e.target.value);
   }
@@ -27,10 +28,32 @@ const SelectCategoryModal = ({ repeatedGenres, onCancel, onSelect }: Props) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!genresLoaded && !genresLoading && !genresError && !genresRequestStarted.current) {
+      genresRequestStarted.current = true;
+      void loadGenres();
+    }
+  }, [genresError, genresLoaded, genresLoading, loadGenres]);
+
   return (
     <div className="fixed inset-0 z-100 bg-black/30 flex flex-col items-center justify-center p-4 backdrop-blur-sm">
         <div className="relative w-full max-w-2xl bg-search-bg rounded-2xl flex-col p-4 sm:p-8 max-h-[85dvh] overflow-y-auto custom-scrollbar">
-          { !loading ? (
+          { genresLoading ? (
+            <div className="flex min-h-60 items-center justify-center">
+              <div className="loading-button" />
+            </div>
+          ) : genresError ? (
+            <div className="flex min-h-60 flex-col items-center justify-center gap-4 text-center">
+              <p role="alert" className="text-sm text-red-300">{genresError}</p>
+              <button
+                type="button"
+                onClick={() => void loadGenres()}
+                className="rounded-full bg-high-enfasis px-5 py-2 font-semibold text-background-global transition-transform duration-200 hover:scale-[0.98] active:scale-95"
+              >
+                Reintentar
+              </button>
+            </div>
+          ) : (
             <>
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-fujiWhite tracking-tight">
@@ -42,7 +65,7 @@ const SelectCategoryModal = ({ repeatedGenres, onCancel, onSelect }: Props) => {
                 <div className="mt-2 flex justify-center items-center">
                     <div className="flex items-center relative group">
                         <button
-                          className="text-global hover:text-high-enfasis absolute top-2.2 left-3 opacity-50"
+                          className="text-global hover:text-high-enfasis absolute top-2.2 left-3 opacity-50 transition-transform duration-200 hover:scale-110 active:scale-90"
                           type="button"
                         >
                             <Search size={18} />
@@ -58,7 +81,7 @@ const SelectCategoryModal = ({ repeatedGenres, onCancel, onSelect }: Props) => {
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                { genres!
+                { genres
                     .filter(g => !repeatedGenres.includes(g.name))
                     .filter(g => {
                       if (searchedGenre !== "") {
@@ -85,15 +108,14 @@ const SelectCategoryModal = ({ repeatedGenres, onCancel, onSelect }: Props) => {
                       </div>
                     )
                 )}
+                {genres.length === 0 && (
+                  <p className="col-span-full py-8 text-center text-several-light">No hay géneros disponibles.</p>
+                )}
               </div>
             </>
-          ) : (
-            <div className="flex items-center justify-center w-full h-full">
-              <div className="loading-button" />
-            </div>
           )}
         </div>
-        <button onClick={onCancel} className="mt-4 sm:mt-6 bg-high-enfasis font-bold px-8 py-2 rounded-2xl hover:scale-95 transition-all cursor-pointer text-background-global">
+        <button onClick={onCancel} className="mt-4 sm:mt-6 bg-high-enfasis font-bold px-8 py-2 rounded-2xl hover:scale-95 active:scale-90 transition-all cursor-pointer text-background-global">
           Cancelar
         </button>
     </div>

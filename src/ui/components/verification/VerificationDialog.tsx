@@ -34,7 +34,7 @@ interface VerificationDialogProps {
   notFoundMessage?: string;
   replaceIfDestinationMismatch?: boolean;
   stepLabels?: string[];
-  verifiedContent?: ReactNode;
+  verifiedContent?: (submitting: boolean) => ReactNode;
 }
 
 function toTimestamp(value: string | null, epoch?: number | null): number | null {
@@ -98,6 +98,8 @@ export default function VerificationDialog({
   const [serverResendLimitReached, setServerResendLimitReached] = useState(false);
   const preparationRef = useRef<{ key: string; promise: Promise<VerificationExistence> } | null>(null);
   const autoCompletionRef = useRef(false);
+  const completionInProgressRef = useRef(false);
+  const verificationInProgressRef = useRef(false);
   const onVerifiedRef = useRef(onVerified);
   const verifiedContentRef = useRef(verifiedContent);
   const { username, userEmail, optionalUserId, verificationType, destinationEmail } = request;
@@ -120,6 +122,8 @@ export default function VerificationDialog({
   }, []);
 
   const completeOperation = async () => {
+    if (completionInProgressRef.current) return;
+    completionInProgressRef.current = true;
     setSubmitting(true);
     setMessage(null);
     try {
@@ -127,6 +131,7 @@ export default function VerificationDialog({
     } catch (error) {
       setMessage(failureMessage(error, "La verificación se confirmó, pero no se pudo completar la operación. Inténtalo otra vez."));
     } finally {
+      completionInProgressRef.current = false;
       setSubmitting(false);
     }
   };
@@ -214,6 +219,8 @@ export default function VerificationDialog({
 
   const verify = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (verificationInProgressRef.current) return;
+    verificationInProgressRef.current = true;
     setSubmitting(true);
     setMessage(null);
     let verified = codeVerified;
@@ -236,6 +243,7 @@ export default function VerificationDialog({
         ? "La verificación se confirmó, pero no se pudo completar la operación. Vuelve a intentarlo."
         : "El código no es válido o ha caducado. Verifícalo e inténtalo otra vez."));
     } finally {
+      verificationInProgressRef.current = false;
       setSubmitting(false);
     }
   };
@@ -270,7 +278,7 @@ export default function VerificationDialog({
             )}
           </div>
           {onClose && (
-            <button type="button" onClick={onClose} aria-label="Volver" className="text-several-light hover:text-global">
+            <button type="button" onClick={onClose} aria-label="Volver" className="text-several-light transition-transform duration-200 hover:scale-110 active:scale-90 hover:text-global">
               <ArrowLeft size={20} />
             </button>
           )}
@@ -294,7 +302,7 @@ export default function VerificationDialog({
                 <p className="mt-1 font-mono text-3xl font-bold tabular-nums text-global">{formatRemaining(remainingVerification)}</p>
               </div>
             )}
-            {verifiedContent}
+            {verifiedContent(submitting)}
           </form>
         ) : verificationReady && !verificationExpired && !codeVerified ? (
           <>
@@ -324,24 +332,19 @@ export default function VerificationDialog({
               <button
                 type="submit"
                 disabled={submitting || !verificationReady || code.length !== 6}
-                className="w-full rounded-full bg-high-enfasis py-3.5 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full rounded-full bg-high-enfasis py-3.5 font-semibold text-white transition-transform duration-200 hover:scale-[0.98] active:scale-95 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
               >
                 {submitting ? "Verificando..." : "Verificar código"}
               </button>
             </form>
             <div className="mt-4">
-              {remainingCode > 0 && (
-                <p className="mb-2 text-center text-sm text-several-light" aria-live="polite">
-                  Podrás reenviar el código en {formatRemaining(remainingCode)}
-                </p>
-              )}
               <button
                 type="button"
                 onClick={regenerate}
                 disabled={submitting || now == null || remainingCode > 0 || resendLimitReached}
-                className="flex w-full items-center justify-center gap-2 rounded-full border border-toolbar-bg/15 py-3 font-semibold text-global disabled:cursor-not-allowed disabled:opacity-50"
+                className="group flex w-full items-center justify-center gap-2 rounded-full border border-toolbar-bg/15 py-3 font-semibold text-global transition-transform duration-200 hover:scale-[0.98] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
               >
-                <RotateCw size={16} />
+                <RotateCw size={16} className="transition-transform duration-300 group-hover:rotate-180" />
                 {resendLimitReached
                   ? "Ya utilizaste el reenvío disponible"
                   : submitting
@@ -364,7 +367,7 @@ export default function VerificationDialog({
             <button
               type="submit"
               disabled={submitting || verificationExpired}
-              className="w-full rounded-full bg-high-enfasis py-3.5 font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+              className="w-full rounded-full bg-high-enfasis py-3.5 font-semibold text-white transition-transform duration-200 hover:scale-[0.98] active:scale-95 hover:opacity-90 disabled:opacity-50 disabled:hover:scale-100"
             >
               {submitting ? "Procesando..." : "Completar operación"}
             </button>
@@ -382,7 +385,7 @@ export default function VerificationDialog({
   );
 
   return embedded
-    ? <section className="w-full max-w-xl rounded-3xl border border-toolbar-bg/10 bg-background-global p-7 shadow-2xl">{content}</section>
+    ? <section className="flex min-h-[min(720px,calc(100dvh-3rem))] max-h-[calc(100dvh-3rem)] w-full max-w-3xl flex-col overflow-y-auto rounded-3xl border border-toolbar-bg/10 bg-background-global p-8 shadow-2xl sm:p-10">{content}</section>
     : (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
         <section className="w-full max-w-lg rounded-3xl border border-toolbar-bg/10 bg-background-global p-7 shadow-2xl">{content}</section>

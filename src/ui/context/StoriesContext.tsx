@@ -7,7 +7,11 @@ export interface StoriesContextType {
     loading: boolean;
     error: string | null;
     // Genres
-    genres: BasicInfo[] | null;
+    genres: BasicInfo[];
+    genresLoaded: boolean;
+    genresLoading: boolean;
+    genresError: string | null;
+    loadGenres: () => Promise<void>;
     // Rest Methods
     pageTags: (offset: number, limit: number, tagName: string) => Promise<PageResponse<BasicInfo>>
     createStory: (story: RegisterStory) => Promise<boolean>;

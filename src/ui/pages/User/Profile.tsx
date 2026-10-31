@@ -165,7 +165,7 @@ export default function Profile() {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               aria-label="Cambiar foto de perfil"
-              className="group relative h-32 w-32 shrink-0 overflow-hidden rounded-full border-4 border-background-global bg-background-global shadow-2xl"
+              className="group relative h-32 w-32 shrink-0 overflow-hidden rounded-full border-4 border-background-global bg-background-global shadow-2xl transition-transform duration-200 hover:scale-105 active:scale-95"
             >
               {authUser.profileImageUrl ? (
                 <img src={authUser.profileImageUrl} alt={`Foto de ${authUser.username}`} className="h-full w-full object-cover transition-opacity group-hover:opacity-40" />
@@ -177,7 +177,7 @@ export default function Profile() {
                 />
               )}
               <span className="absolute inset-0 flex items-center justify-center text-several-light opacity-0 transition-opacity group-hover:opacity-100">
-                <Pen size={30} />
+                <Pen size={30} className="transition-transform duration-200 group-hover:scale-110 group-active:scale-90" />
               </span>
               <input ref={fileInputRef} type="file" className="hidden" accept="image/jpeg,image/png,image/webp" onChange={selectImage} />
             </button>

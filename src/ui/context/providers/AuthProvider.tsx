@@ -29,7 +29,12 @@ function AuthProvider({ children }: Props) {
     // Rest Methods
     const login = async (userName: string, password: string): Promise<boolean> => {
         setError(null);
-        await executeTask(() => authService.login(userName, password), setLoading, setError, showAlert, true);
+        const authenticated = await executeTask(async () => {
+            await authService.login(userName, password);
+            return true;
+        }, setLoading, setError, showAlert, true);
+        if (!authenticated) return false;
+
         const userInfo = await executeTask(() => authUserService.getUserProfile(), setLoading, setError, showAlert, true);
         if (!userInfo) return false;
         setAuthUser(userInfo);

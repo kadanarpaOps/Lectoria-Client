@@ -52,7 +52,7 @@ export default function RecoveryPassword() {
   };
 
   return (
-    <main className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-black/70 px-5 py-12 backdrop-blur-sm">
+    <main className="fixed inset-0 z-50 flex min-h-screen items-center justify-center overflow-y-auto bg-black/70 px-5 py-6 backdrop-blur-sm">
       {verificationRequest && (
         <VerificationDialog
           embedded
@@ -74,7 +74,7 @@ export default function RecoveryPassword() {
             }
             await completePasswordReset();
           }}
-          verifiedContent={resumeRegistration ? undefined : (
+          verifiedContent={resumeRegistration ? undefined : (submitting) => (
             <>
               <p className="text-sm text-several-light">La identidad está verificada. Ahora puedes elegir una contraseña nueva.</p>
               <label className="block text-xs font-semibold uppercase tracking-widest text-several-light">
@@ -104,8 +104,12 @@ export default function RecoveryPassword() {
                 />
               </label>
               {passwordError && <p role="alert" className="text-sm text-red-400">{passwordError}</p>}
-              <button type="submit" className="w-full rounded-full bg-high-enfasis py-3.5 font-semibold text-white transition hover:opacity-90">
-                Guardar contraseña y volver al inicio de sesión
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full rounded-full bg-high-enfasis py-3.5 font-semibold text-white transition hover:scale-[0.98] active:scale-95 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {submitting ? "Guardando contraseña..." : "Guardar contraseña"}
               </button>
             </>
           )}

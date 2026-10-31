@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { StoryService } from "../../../core/use-cases/stories/StoryUseCases";
 import type { BasicInfo, LastModifiedStory, RegisterStory, StoryInfo, UpdateStory, StoryFilters } from "../../../core/domain/models/stories/StoryModel";
 import executeTask from "../utils/TaskExecutor";
@@ -19,13 +19,30 @@ function StoriesProvider({ children }: Props) {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     // Genres
-    const [genres, setGenres] = useState<BasicInfo[] | null>(null);
+    const [genres, setGenres] = useState<BasicInfo[]>([]);
+    const [genresLoaded, setGenresLoaded] = useState(false);
+    const [genresLoading, setGenresLoading] = useState(false);
+    const [genresError, setGenresError] = useState<string | null>(null);
 
     // Business Methods
     const pageTags = async (offset: number, limit: number, tagName: string) => {
         const response = await executeTask(() => storiesService.pageTags(offset, limit, tagName), setLoading, setError);
         return response as PageResponse<BasicInfo>;
     };
+
+    const loadGenres = useCallback(async () => {
+        setGenresLoading(true);
+        setGenresError(null);
+        try {
+            const response = await storiesService.getAllGenres();
+            setGenres(response);
+            setGenresLoaded(true);
+        } catch (loadError) {
+            setGenresError(loadError instanceof Error ? loadError.message : "No se pudieron cargar los géneros.");
+        } finally {
+            setGenresLoading(false);
+        }
+    }, []);
 
     const createStory = async (storyData: RegisterStory): Promise<boolean> => {
         const response = await executeTask(() => storiesService.registerStory(storyData), setLoading, setError, showAlert, true);
@@ -102,21 +119,15 @@ function StoriesProvider({ children }: Props) {
         return true;
     }, [showAlert]);
 
-    /** useEffects */
-    // Load all Genres
-    useEffect(() => {
-        const loadAllGenres = async () => {
-            const response = await executeTask(() => storiesService.getAllGenres(), setLoading, setError);
-            setGenres(response);
-        }
-        loadAllGenres();
-    }, []);
-
     // Export Values
     const exportValues: StoriesContextType = {
         loading,
         error,
         genres,
+        genresLoaded,
+        genresLoading,
+        genresError,
+        loadGenres,
         createStory,
         updateStory,
         updateStoryCover,
