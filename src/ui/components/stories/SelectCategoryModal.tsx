@@ -22,9 +22,10 @@ const SelectCategoryModal = ({ repeatedGenres, onCancel, onSelect }: Props) => {
   }
 
   useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = previousOverflow;
     };
   }, []);
 
@@ -36,7 +37,8 @@ const SelectCategoryModal = ({ repeatedGenres, onCancel, onSelect }: Props) => {
   }, [genresError, genresLoaded, genresLoading, loadGenres]);
 
   return (
-    <div className="fixed inset-0 z-100 bg-black/30 flex flex-col items-center justify-center p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-100 overflow-y-auto bg-black/30 backdrop-blur-sm">
+      <div className="flex min-h-full flex-col items-center justify-center p-4">
         <div className="relative w-full max-w-2xl bg-search-bg rounded-2xl flex-col p-4 sm:p-8 max-h-[85dvh] overflow-y-auto custom-scrollbar">
           { genresLoading ? (
             <div className="flex min-h-60 items-center justify-center">
@@ -115,9 +117,10 @@ const SelectCategoryModal = ({ repeatedGenres, onCancel, onSelect }: Props) => {
             </>
           )}
         </div>
-        <button onClick={onCancel} className="mt-4 sm:mt-6 bg-high-enfasis font-bold px-8 py-2 rounded-2xl hover:scale-95 active:scale-90 transition-all cursor-pointer text-background-global">
+        <button onClick={onCancel} className="mt-4 sm:mt-6 shrink-0 bg-high-enfasis font-bold px-8 py-2 rounded-2xl hover:scale-95 active:scale-90 transition-all cursor-pointer text-background-global">
           Cancelar
         </button>
+      </div>
     </div>
   )
 }

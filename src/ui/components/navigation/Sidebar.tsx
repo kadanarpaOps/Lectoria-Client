@@ -1,4 +1,5 @@
 import { BookCopy, CircleUserRound, Compass, Settings, SquarePen, UsersRound } from "lucide-react";
+import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -13,6 +14,17 @@ const Sidebar = ({ isSidebarOpen, isMobile, onClose }: SidebarProps) => {
   const navigate = useNavigate();
   const { authUser, loading } = useAuth();
   const isAdmin = authUser?.userRoles.some((role) => String(role).includes("ADMIN")) ?? false;
+
+  // Prevent the page behind the mobile drawer from scrolling
+  useEffect(() => {
+    if (!isMobile || !isSidebarOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMobile, isSidebarOpen]);
+
   const navigationClass = (path: string) => `flex items-center space-x-3 py-4 px-4 ${
     (path === "/users" ? location.pathname === path : location.pathname.includes(path))
       ? "text-high-enfasis bg-high-enfasis/10 rounded-r-full border-l-4 border-high-enfasis cursor-default"

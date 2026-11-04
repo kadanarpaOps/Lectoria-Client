@@ -19,7 +19,7 @@ const MainLayout = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-dvh">
       <Sidebar
         isSidebarOpen={isSidebarOpen}
         isMobile={isMobile}
