@@ -60,34 +60,34 @@ export default function AdminUsers() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-6 sm:py-10">
-      <header className="mb-8">
+    <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+      <header className="mb-6 sm:mb-8">
         <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-high-enfasis"><Shield size={16} /> Administración</p>
-        <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-global">Usuarios de Lectoria</h1>
+        <h1 className="mt-2 text-2xl font-bold text-global sm:text-3xl">Usuarios de Lectoria</h1>
         <p className="mt-3 text-several-light">Consulta usuarios y gestiona sus roles y estado de cuenta.</p>
       </header>
-      <form onSubmit={(event) => { event.preventDefault(); setPage(0); setUsernameFilter(username.trim()); setEmailFilter(email.trim()); }} className="mb-6 grid gap-3 rounded-3xl border border-toolbar-bg/10 bg-background-global p-5 md:grid-cols-[1fr_1fr_auto_auto]">
-        <input value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Filtrar por usuario" className="rounded-xl bg-inputs-bg px-4 py-3 text-global outline-none focus:ring-2 focus:ring-high-enfasis" />
-        <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Filtrar por correo" className="rounded-xl bg-inputs-bg px-4 py-3 text-global outline-none focus:ring-2 focus:ring-high-enfasis" />
-        <button className="rounded-full bg-high-enfasis px-5 py-3 font-semibold text-white">Buscar</button>
-        <button type="button" onClick={() => { setUsername(""); setEmail(""); setUsernameFilter(""); setEmailFilter(""); setPage(0); }} className="rounded-full border border-toolbar-bg/15 px-5 py-3 font-semibold text-global">Limpiar</button>
+      <form onSubmit={(event) => { event.preventDefault(); setPage(0); setUsernameFilter(username.trim()); setEmailFilter(email.trim()); }} className="mb-6 grid grid-cols-1 gap-3 rounded-3xl border border-toolbar-bg/10 bg-background-global p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto]">
+        <input value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Filtrar por usuario" className="w-full min-w-0 rounded-xl bg-inputs-bg px-4 py-3 text-global outline-none focus:ring-2 focus:ring-high-enfasis" />
+        <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Filtrar por correo" className="w-full min-w-0 rounded-xl bg-inputs-bg px-4 py-3 text-global outline-none focus:ring-2 focus:ring-high-enfasis" />
+        <button className="min-h-11 w-full whitespace-nowrap rounded-full bg-high-enfasis px-5 py-3 font-semibold text-white lg:w-auto">Buscar</button>
+        <button type="button" onClick={() => { setUsername(""); setEmail(""); setUsernameFilter(""); setEmailFilter(""); setPage(0); }} className="min-h-11 w-full whitespace-nowrap rounded-full border border-toolbar-bg/15 px-5 py-3 font-semibold text-global lg:w-auto">Limpiar</button>
       </form>
       {error && <p role="alert" className="mb-4 rounded-xl bg-red-500/10 p-4 text-red-300">{error}</p>}
       <section className="space-y-3">
-        <div className="flex items-center justify-between text-sm text-several-light"><span>{totalItems} usuarios</span><span>Página {page + 1} de {totalPages}</span></div>
-        {loading ? <div className="py-16 text-center text-several-light">Cargando usuarios...</div> : users.length === 0 ? <div className="rounded-3xl border border-dashed border-toolbar-bg/20 p-10 text-center text-several-light">No hay resultados.</div> : users.map((user) => {
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-sm text-several-light"><span>{totalItems} usuarios</span><span>Página {page + 1} de {totalPages}</span></div>
+        {loading ? <div className="px-4 py-16 text-center text-several-light">Cargando usuarios...</div> : users.length === 0 ? <div className="rounded-3xl border border-dashed border-toolbar-bg/20 p-6 text-center text-several-light sm:p-10">No hay resultados.</div> : users.map((user) => {
           const roles = user.userRoles ?? [];
           return (
-            <article key={user.userId} className="flex flex-col gap-5 rounded-3xl border border-toolbar-bg/10 bg-background-global p-5 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-inputs-bg">
+            <article key={user.userId} className="flex flex-col gap-4 rounded-3xl border border-toolbar-bg/10 bg-background-global p-4 sm:gap-5 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-inputs-bg">
                   {user.userDetails?.profileImageUrl ? <img src={user.userDetails.profileImageUrl} alt="" className="h-full w-full object-cover" /> : <UserRound className="text-several-light" />}
                 </div>
-                <div>
-                  <h2 className="font-semibold text-global">{user.username}</h2>
-                  <p className="text-sm text-several-light">{user.email}</p>
-                  <p className="mt-1 text-xs text-high-enfasis">{roles.join(", ") || "Sin roles"}</p>
-                  <p className="mt-1 text-xs text-several-light">
+                <div className="min-w-0 flex-1">
+                  <h2 className="break-words font-semibold text-global">{user.username}</h2>
+                  <p className="break-all text-sm text-several-light">{user.email}</p>
+                  <p className="mt-1 break-words text-xs text-high-enfasis">{roles.join(", ") || "Sin roles"}</p>
+                  <p className="mt-1 break-words text-xs text-several-light">
                     Registro {user.userDetails?.registeredVerified ? "verificado" : "pendiente"}
                     {user.userDetails?.createdAt ? ` · ${new Date(user.userDetails.createdAt).toLocaleDateString("es-ES")}` : ""}
                   </p>
@@ -96,16 +96,16 @@ export default function AdminUsers() {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid w-full min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 lg:w-auto lg:max-w-md lg:flex-1">
                 {(["LECTORIA_ADMIN", "LECTORIA_LECTOR", "LECTORIA_WRITER"] as const).map((role) => {
                   const hasRole = roles.includes(role);
                   return (
-                    <button key={role} disabled={!user.userId} onClick={() => void changeRole(user, role, !hasRole)} className="rounded-full border border-toolbar-bg/15 px-4 py-2 text-sm font-medium text-global disabled:cursor-not-allowed disabled:opacity-40">
+                    <button key={role} disabled={!user.userId} onClick={() => void changeRole(user, role, !hasRole)} className="min-h-11 w-full rounded-full border border-toolbar-bg/15 px-3 py-2 text-center text-sm font-medium text-global disabled:cursor-not-allowed disabled:opacity-40">
                       {hasRole ? `Quitar ${role.replace("LECTORIA_", "").toLowerCase()}` : `Agregar ${role.replace("LECTORIA_", "").toLowerCase()}`}
                     </button>
                   );
                 })}
-                <button disabled={!user.userId} onClick={() => void toggleStatus(user)} className="rounded-full border border-toolbar-bg/15 px-4 py-2 text-sm font-medium text-global disabled:cursor-not-allowed disabled:opacity-40">
+                <button disabled={!user.userId} onClick={() => void toggleStatus(user)} className="min-h-11 w-full rounded-full border border-toolbar-bg/15 px-3 py-2 text-center text-sm font-medium text-global disabled:cursor-not-allowed disabled:opacity-40">
                   {user.isEnabled ? "Deshabilitar cuenta" : "Habilitar cuenta"}
                 </button>
               </div>
