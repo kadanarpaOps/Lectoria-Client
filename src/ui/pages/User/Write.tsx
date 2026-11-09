@@ -29,6 +29,18 @@ const extensions = [
     })
 ];
 
+const EDITING_CHAPTER_KEY = "editingChapter";
+
+const readStoredChapter = (): EditingChapter | null => {
+    const stored = localStorage.getItem(EDITING_CHAPTER_KEY);
+    if (!stored) return null;
+    try {
+        return JSON.parse(stored) as EditingChapter;
+    } catch {
+        return null;
+    }
+};
+
 export default function Write() {
 
     // Use Navigate
@@ -42,7 +54,8 @@ export default function Write() {
     const [ editingChapter, setEditingChapter ] = useState<EditingChapter | null>(null);
     const { updateChapter, error } = useChapters();
 
-    const storageEditingChapter = localStorage.getItem("editingChapter");
+    // Antes se leía localStorage en cada render: como cada tecla guarda el borrador, el texto
+    // cambiaba, el useEffect de abajo se volvía a ejecutar y recreaba los editores (perdían el foco)
     const chapterToEdit = location.state?.chapterToEdit as EditingChapter || null;
 
     {/**
@@ -57,16 +70,15 @@ export default function Write() {
 
     useEffect(() => {
         const loadChapterToEdit = () => {
-            if (chapterToEdit && !storageEditingChapter) {
+            const recoveredChapterEdition = readStoredChapter();
+            if (chapterToEdit && !recoveredChapterEdition) {
                 {/** Casuística 3 */}
-                localStorage.setItem('editingChapter', JSON.stringify(chapterToEdit));
+                localStorage.setItem(EDITING_CHAPTER_KEY, JSON.stringify(chapterToEdit));
                 setEditingChapter(chapterToEdit);
-            } else if (!chapterToEdit && storageEditingChapter) {
+            } else if (!chapterToEdit && recoveredChapterEdition) {
                 {/** Casuística 2 */}
-                const recoveredChapterEdition = JSON.parse(storageEditingChapter) as EditingChapter;
                 setEditingChapter(recoveredChapterEdition);
-            } else if (chapterToEdit && storageEditingChapter) {
-                const recoveredChapterEdition = JSON.parse(storageEditingChapter) as EditingChapter;
+            } else if (chapterToEdit && recoveredChapterEdition) {
                 if (recoveredChapterEdition.id !== chapterToEdit.id) {
                     {/** Casuística 4.2 */}
                     setEditingChapter(recoveredChapterEdition);
@@ -78,7 +90,16 @@ export default function Write() {
             }
         }
         loadChapterToEdit();
-    }, [chapterToEdit, storageEditingChapter]);
+    }, [chapterToEdit]);
+
+    // Guarda el borrador mezclando con lo último guardado: así el título no borra el contenido
+    // (y viceversa) cuando se escribe en los dos editores
+    const persistDraft = (changes: Partial<EditingChapter>) => {
+        if (!editingChapter) return;
+        const stored = readStoredChapter();
+        const base = stored?.id === editingChapter.id ? stored : editingChapter;
+        localStorage.setItem(EDITING_CHAPTER_KEY, JSON.stringify({ ...base, ...changes }));
+    };
 
     // Editor
     const [ wordsCount, setWordsCount ] = useState(0);
@@ -94,10 +115,8 @@ export default function Write() {
                 defaultAlignment: 'left'
             }),
         ],
-        onUpdate({ editor}) {
-            if (editingChapter) {
-                localStorage.setItem('editingChapter', JSON.stringify({ ...editingChapter, title: JSON.stringify(editor.getJSON()) }));
-            }
+        onUpdate({ editor }) {
+            persistDraft({ title: JSON.stringify(editor.getJSON()) });
         },
         editorProps: {
             attributes: {
@@ -106,19 +125,21 @@ export default function Write() {
         },
         onFocus: () => setActiveEditor('title'),
         content: editingChapter?.title ? parseTiptapContent(editingChapter.title) : "",
-    }, [editingChapter]);
+    // Solo se recrea el editor si cambia el capítulo, no cada vez que cambia el objeto
+    }, [editingChapter?.id]);
 
     const editor = useEditor({
         extensions,
+        onCreate({ editor }) {
+            setWordsCount(editor.storage.characterCount.words());
+        },
         onUpdate({ editor }) {
             setWordsCount(editor.storage.characterCount.words());
-            if (editingChapter) {
-                localStorage.setItem('editingChapter', JSON.stringify({ ...editingChapter, content: JSON.stringify(editor.getJSON()) }));
-            }
+            persistDraft({ content: JSON.stringify(editor.getJSON()) });
         },
         onFocus: () => setActiveEditor('content'),
         content: editingChapter ? parseTiptapContent(editingChapter.content) : "",
-    }, [editingChapter]);
+    }, [editingChapter?.id]);
 
     const handleChapterSave = async (): Promise<boolean> => {
         const title = titleEditor?.getJSON();
@@ -140,7 +161,7 @@ export default function Write() {
         } else {
             showAlert("Capítulo guardado exitosamente", 5000, "SUCCESS");
             setEditingChapter(null);
-            localStorage.removeItem('editingChapter');
+            localStorage.removeItem(EDITING_CHAPTER_KEY);
             navigate(`/profile`, {state: {}, replace: true});
         }
 
@@ -149,12 +170,12 @@ export default function Write() {
 
     const setAnotherChapter = () => {
         setEditingChapter(chapterToEdit);
-        localStorage.setItem('editingChapter', JSON.stringify(chapterToEdit));
+        localStorage.setItem(EDITING_CHAPTER_KEY, JSON.stringify(chapterToEdit));
     }
 
     const setCustomChapter = (chapter: EditingChapter) => {
         setEditingChapter(chapter);
-        localStorage.setItem('editingChapter', JSON.stringify(chapter));
+        localStorage.setItem(EDITING_CHAPTER_KEY, JSON.stringify(chapter));
     }
 
     const handleSaveAndEditOtherChapter = async () => {
@@ -174,7 +195,7 @@ export default function Write() {
     return (
         <div className="grow flex flex-col items-center px-4 sm:px-8 lg:px-12 pb-28 sm:pb-12 writing-canvas min-w-0">
             {editingChapter && chapterToEdit && (
-                editingChapter.id !== chapterToEdit. id && (
+                editingChapter.id !== chapterToEdit.id && (
                     <SaveActualEditionModal
                         onDiscard={setAnotherChapter}
                         onSave={handleSaveAndEditOtherChapter}
