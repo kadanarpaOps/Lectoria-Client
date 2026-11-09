@@ -119,11 +119,9 @@ const StoryDetails = () => {
                       <Clock size={20} />
                     </span>
                     <span className="text-sm">
-                      {story.updatedAt !== null ? (
-                        "No se ha modificado"
-                      ) : (
-                        `Última modificación ${new Date(story.createdAt.toLocaleString()).toLocaleString()}`
-                      )}
+                      {story.updatedAt || story.lastActivityAt
+                        ? `Última modificación: ${getLastModifiedTime(story.updatedAt ?? story.lastActivityAt)}`
+                        : `Publicada: ${getLastModifiedTime(story.createdAt)}`}
                     </span>
                   </div>
                 </div>

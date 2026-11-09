@@ -415,7 +415,7 @@ const EditStory = () => {
                       Actualizado
                     </span>
                     <p className="text-xl font-display font-bold text-on-surface">
-                      {story.updatedAt ? getLastModifiedTime(story.updatedAt): "Nunca"}
+                      {getLastModifiedTime(story.updatedAt ?? story.lastActivityAt ?? story.createdAt)}
                     </p>
                   </div>
                 </div>

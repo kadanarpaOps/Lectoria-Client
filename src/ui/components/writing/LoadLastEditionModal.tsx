@@ -64,7 +64,7 @@ const LoadLastEditionModal = ({ setChapter }: Props) => {
                 {loading ? "Cargando historia..." : lastStory?.title ?? "No tienes una historia reciente"}
               </h4>
               <p className="text-xs text-on-surface-variant">
-                {lastStory ? `${lastStory.hidden ? "Borrador" : "Publicado"} • Última Edición ${lastStory.updatedAt ? getLastModifiedTime(lastStory.updatedAt): "Nunca"} • ${lastStory.totalChapters} capítulos` : "Aún no hay una historia reciente para mostrar"}
+                {lastStory ? `${lastStory.hidden ? "Borrador" : "Publicado"} • Última Edición ${getLastModifiedTime(lastStory.updatedAt ?? lastStory.lastActivityAt ?? lastStory.createdAt)} • ${lastStory.totalChapters} capítulos` : "Aún no hay una historia reciente para mostrar"}
               </p>
             </div>
           </div>

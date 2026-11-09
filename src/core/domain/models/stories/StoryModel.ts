@@ -34,7 +34,8 @@ export interface StoryInfo {
     totalFavorites: number;
     status: StatusNames;
     createdAt: Date;
-    updatedAt: Date;
+    updatedAt: Date | null;
+    lastActivityAt: Date | null;
 }
 
 export interface LastModifiedStory extends StoryInfo {
