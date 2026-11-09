@@ -3,6 +3,7 @@ import { Heart, Pencil, Send, Trash2, X } from "lucide-react";
 import type { CommentInfo, CommentPageResponse } from "../../../core/domain/models/comments/CommentModel";
 import { useAuth } from "../../hooks/useAuth";
 import { useComments } from "../../hooks/useComments";
+import { COMMENT_MAX_LENGTH, validateComment } from "../../schemas/comments/comments.schema";
 
 type Props = {
   storyId?: string;
@@ -34,6 +35,8 @@ const CommentsSection = ({ storyId, chapterId, title = "Opiniones de lectores" }
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState("");
   const [loadingMore, setLoadingMore] = useState(false);
+  const [contentError, setContentError] = useState<string | null>(null);
+  const [editingError, setEditingError] = useState<string | null>(null);
 
   const loadPage = useCallback(async (offset: number, append = false) => {
     const filters = { offset, limit: pageSize };
@@ -55,10 +58,14 @@ const CommentsSection = ({ storyId, chapterId, title = "Opiniones de lectores" }
 
   const submitComment = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const trimmed = content.trim();
-    if (!trimmed) return;
+    const validation = validateComment(content);
+    if (validation.error !== null) {
+      setContentError(validation.error);
+      return;
+    }
+    setContentError(null);
     const comment = await createComment({
-      content: trimmed,
+      content: validation.content,
       ...(storyId ? { storyId } : {}),
       ...(chapterId ? { chapterId } : {}),
     });
@@ -68,7 +75,13 @@ const CommentsSection = ({ storyId, chapterId, title = "Opiniones de lectores" }
   };
 
   const saveEdit = async (commentId: string) => {
-    const updated = await updateComment(commentId, { content: editingContent.trim() });
+    const validation = validateComment(editingContent);
+    if (validation.error !== null) {
+      setEditingError(validation.error);
+      return;
+    }
+    setEditingError(null);
+    const updated = await updateComment(commentId, { content: validation.content });
     if (!updated) return;
     setPage((current) => current && ({
       ...current,
@@ -121,11 +134,17 @@ const CommentsSection = ({ storyId, chapterId, title = "Opiniones de lectores" }
           <textarea
             id="new-comment"
             value={content}
-            onChange={(event) => setContent(event.target.value)}
+            onChange={(event) => {
+              setContent(event.target.value);
+              if (contentError) setContentError(null);
+            }}
             className="w-full bg-surface-container-lowest rounded-2xl p-4 text-on-surface placeholder:text-on-surface-variant/40 focus:ring-1 focus:ring-primary/20 min-h-25 resize-y focus:outline-none"
             placeholder="Escribe tus pensamientos..."
-            maxLength={5000}
+            maxLength={COMMENT_MAX_LENGTH}
+            aria-invalid={contentError !== null}
+            aria-describedby={contentError ? "new-comment-error" : undefined}
           />
+          {contentError && <p id="new-comment-error" role="alert" className="mt-2 text-sm text-error">{contentError}</p>}
           <div className="mt-3 flex justify-end">
             <button
               type="submit"
@@ -170,13 +189,19 @@ const CommentsSection = ({ storyId, chapterId, title = "Opiniones de lectores" }
                   <div className="space-y-3">
                     <textarea
                       value={editingContent}
-                      onChange={(event) => setEditingContent(event.target.value)}
+                      onChange={(event) => {
+                        setEditingContent(event.target.value);
+                        if (editingError) setEditingError(null);
+                      }}
                       className="w-full rounded-xl bg-surface-container-lowest p-3 text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 resize-y"
-                      maxLength={5000}
+                      maxLength={COMMENT_MAX_LENGTH}
+                      aria-label="Editar comentario"
+                      aria-invalid={editingError !== null}
                       autoFocus
                     />
+                    {editingError && <p role="alert" className="text-sm text-error">{editingError}</p>}
                     <div className="flex flex-wrap justify-end gap-2">
-                      <button type="button" onClick={() => setEditingId(null)} className="px-3 py-2 rounded-lg text-sm hover:bg-surface-container-high cursor-pointer inline-flex items-center gap-1">
+                      <button type="button" onClick={() => { setEditingId(null); setEditingError(null); }} className="px-3 py-2 rounded-lg text-sm hover:bg-surface-container-high cursor-pointer inline-flex items-center gap-1">
                         <X size={15} /> Cancelar
                       </button>
                       <button type="button" onClick={() => void saveEdit(comment.id)} disabled={loading || !editingContent.trim()} className="px-3 py-2 rounded-lg bg-primary text-on-primary text-sm disabled:opacity-50 cursor-pointer">
@@ -193,7 +218,7 @@ const CommentsSection = ({ storyId, chapterId, title = "Opiniones de lectores" }
                   </button>
                   {isAuthor && editingId !== comment.id && (
                     <div className="flex gap-2">
-                      <button type="button" onClick={() => { setEditingId(comment.id); setEditingContent(comment.content); }} aria-label="Editar comentario" className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary cursor-pointer">
+                      <button type="button" onClick={() => { setEditingId(comment.id); setEditingContent(comment.content ?? ""); setEditingError(null); }} aria-label="Editar comentario" className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-primary cursor-pointer">
                         <Pencil size={16} />
                       </button>
                       <button type="button" onClick={() => void removeComment(comment.id)} aria-label="Eliminar comentario" disabled={loading} className="p-2 rounded-lg text-on-surface-variant hover:bg-error/10 hover:text-error disabled:opacity-50 cursor-pointer">
