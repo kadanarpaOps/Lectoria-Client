@@ -21,6 +21,11 @@ export const getStoriesRequest = async (filters: StoryFilters) : Promise<PageRes
     return response.data;
 }
 
+export const getPublicStoriesByUserRequest = async (userId: string, filters: StoryFilters): Promise<PageResponse<StoryInfo>> => {
+    const response = await storyClient.get(`api/story/by-user/${userId}`, { params: filters });
+    return response.data;
+}
+
 export const getAuthUserStoriesRequest = async (filters: StoryFilters): Promise<PageResponse<StoryInfo>> => {
     const response = await storyClient.get(`api/story/mine`, {
         params: filters

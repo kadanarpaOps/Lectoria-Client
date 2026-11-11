@@ -1,14 +1,7 @@
 export interface UserDirectoryEntry {
   userId: string;
   username: string;
-  email: string;
-  userRoles: string[];
-  userDetails: {
-    createdAt: string;
-    lastUpdatedAt: string;
-    registeredVerified: boolean;
-    profileImageUrl: string | null;
-  };
+  profileImageUrl: string | null;
 }
 
 export interface UserDirectoryPage {
@@ -19,4 +12,11 @@ export interface UserDirectoryPage {
     totalItems: number;
     totalPages: number;
   };
+}
+
+export interface PublicUserProfile {
+  userId: string;
+  username: string;
+  profileImageUrl: string | null;
+  memberSince: string | null;
 }

@@ -89,6 +89,11 @@ function StoriesProvider({ children }: Props) {
         return response;
     }, []);
 
+    const loadPublicStoriesByUser = useCallback(async (userId: string, filters: StoryFilters): Promise<PageResponse<StoryInfo>> => {
+        const response = await executeTask(() => storiesService.getPublicStoriesByUser(userId, filters), setLoading, setError) as PageResponse<StoryInfo>;
+        return response;
+    }, []);
+
     const loadLastModifiedStoryForAuthUser = useCallback(async () => {
         const response = await executeTask(() => storiesService.getLastModifiedStory(), setLoading, setError) as LastModifiedStory;
         return response;
@@ -137,6 +142,7 @@ function StoriesProvider({ children }: Props) {
         loadStoriesForAuthUser,
         loadStoryById,
         loadPublishedStories,
+        loadPublicStoriesByUser,
         loadLastModifiedStoryForAuthUser,
         loadAuthUserFavorites,
         // Favorites

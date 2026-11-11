@@ -4,7 +4,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useStories } from "../../hooks/useStories";
 import { useEffect, useRef, useState } from "react";
 import type { StatusNames, StoryInfo, UpdateStory } from "../../../core/domain/models/stories/StoryModel";
-import { ArrowBigDown, Check, ChevronLeft, ChevronRight, Eye, EyeClosed, Info, List, Pencil, Plus, RotateCcw, Trash } from "lucide-react";
+import { ArrowBigDown, Check, Eye, EyeClosed, GripVertical, Info, List, Pencil, Plus, RotateCcw, SlidersHorizontal, Trash } from "lucide-react";
 import { getRandomCover } from "../utils/covers.util";
 import ImageCropperModal from "../../components/images/ImageCropperModal";
 import { updateSchema } from "../../schemas/stories/stories.schema";
@@ -18,6 +18,7 @@ import { useChapters } from "../../hooks/useChapters";
 import type { PageResponse } from "../../../core/domain/models/common/PaginationModels";
 import type { ChapterInfo } from "../../../core/domain/models/chapters/ChapterModel";
 import { countTotalWords, parseTiptapContent, renderWithoutFormat } from "../utils/renderTiptap.util";
+import PageNavigator from "../../components/navigation/PageNavigator";
 
 type UpdateFormValues = z.infer<typeof updateSchema>;
 
@@ -30,7 +31,7 @@ const EditStory = () => {
   // Use Stories
   const { loading, loadStoryById, updateStory, updateStoryCover, deleteStoryCover, toggleStoryStatus } = useStories();
   // Use Chapters
-  const { loading: loadingChapters, createChapter, getOwnedChaptersByStory, toggleChapterStatus, deleteChapter } = useChapters();
+  const { loading: loadingChapters, updating: updatingChapterOrder, createChapter, getOwnedChaptersByStory, toggleChapterStatus, deleteChapter, moveChapterOrder } = useChapters();
   // Extract storyId from the URI
   const { storyId } = useParams<{ storyId: string}>();
   // Find Story Details
@@ -45,8 +46,6 @@ const EditStory = () => {
         }
         setStory(responseStory);
 
-        const responseChapters = await getOwnedChaptersByStory({offset: 1, limit: 5, newestFirst: true}, responseStory.id);
-        setChapters(responseChapters);
       }
     };
     loadStory();
@@ -151,11 +150,14 @@ const EditStory = () => {
   // Modify Chapters
   const [ modifiedChapters, setModifiedChapters ] = useState<boolean>(false);
   const [ listByNewestFirst, setListByNewestFirst ] = useState<boolean>(true);
-  const [ page, setPage ] = useState<number>(1);
+  const [ page, setPage ] = useState<number>(0);
+  const [ draggedChapterId, setDraggedChapterId ] = useState<string | null>(null);
+  const [ dragTargetId, setDragTargetId ] = useState<string | null>(null);
+  const [ targetOrders, setTargetOrders ] = useState<Record<string, number>>({});
   useEffect(() => {
     const refreshChapters = async () => {
       if (story) {
-        const refreshedChapters = await getOwnedChaptersByStory({offset: page, limit: 5, newestFirst: listByNewestFirst}, story.id);
+        const refreshedChapters = await getOwnedChaptersByStory({offset: page * 5, limit: 5, newestFirst: listByNewestFirst}, story.id);
         setChapters(refreshedChapters);
         setModifiedChapters(false);
       }
@@ -185,6 +187,25 @@ const EditStory = () => {
         setModifiedChapters(true);
       }
     }
+  }
+  const onChapterOrderChange = async (chapterId: string, order: number) => {
+    if (!chapters || order < 1 || order > chapters.meta.totalItems) return;
+    const success = await moveChapterOrder(chapterId, order);
+    if (success) {
+      setTargetOrders({});
+      setModifiedChapters(true);
+    }
+  }
+  const onChapterDrop = (targetChapterId: string) => {
+    if (!chapters || !draggedChapterId || draggedChapterId === targetChapterId) {
+      setDraggedChapterId(null);
+      setDragTargetId(null);
+      return;
+    }
+    const targetChapter = chapters.data.find((chapter) => chapter.id === targetChapterId);
+    if (targetChapter) void onChapterOrderChange(draggedChapterId, targetChapter.order);
+    setDraggedChapterId(null);
+    setDragTargetId(null);
   }
 
   return (
@@ -494,8 +515,32 @@ const EditStory = () => {
             <div className="grid gap-4">
               { chapters && chapters.data.length > 0 ? (
                 chapters.data.map(chapter => (
-                  <div key={chapter.id} className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-6 rounded-2xl bg-surface-container-low border border-transparent hover:border-primary/20 transition-all cursor-default">
+                  <div
+                    key={chapter.id}
+                    draggable={!updatingChapterOrder}
+                    onDragStart={(event) => {
+                      setDraggedChapterId(chapter.id);
+                      event.dataTransfer.effectAllowed = "move";
+                      event.dataTransfer.setData("text/plain", chapter.id);
+                    }}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      setDragTargetId(chapter.id);
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      onChapterDrop(chapter.id);
+                    }}
+                    onDragEnd={() => {
+                      setDraggedChapterId(null);
+                      setDragTargetId(null);
+                    }}
+                    className={`group flex flex-col gap-3 rounded-2xl border bg-surface-container-low p-4 transition-all sm:p-6 sm:flex-row sm:items-center sm:justify-between ${
+                      dragTargetId === chapter.id ? "border-primary/70 bg-primary/5" : "border-transparent hover:border-primary/20"
+                    } ${draggedChapterId === chapter.id ? "scale-[0.99] opacity-40" : ""} ${updatingChapterOrder ? "cursor-wait" : "cursor-grab active:cursor-grabbing"}`}
+                  >
                     <div className="flex items-start sm:items-center gap-3 sm:gap-6 min-w-0">
+                      <GripVertical size={20} aria-hidden="true" className="mt-1 shrink-0 text-on-surface-variant/50 sm:mt-0" />
                       <span className="text-xl sm:text-2xl font-display font-black text-on-surface-variant/50 italic shrink-0">
                         {String(chapter.order).padStart(2, '0')}
                       </span>
@@ -508,8 +553,47 @@ const EditStory = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 sm:gap-4 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                      {chapters.meta.totalItems > 5 && (
+                        <details
+                          className="relative"
+                          onClick={(event) => event.stopPropagation()}
+                          onDragStart={(event) => event.stopPropagation()}
+                        >
+                          <summary
+                            aria-label={`Cambiar posición de ${chapter.title || `capítulo ${chapter.order}`}`}
+                            className="flex cursor-pointer list-none items-center gap-2 rounded-lg p-2 text-on-surface-variant transition-colors hover:bg-surface-variant"
+                          >
+                            <SlidersHorizontal size={20} />
+                            <span className="text-xs font-semibold sm:hidden">Posición</span>
+                          </summary>
+                          <div className="absolute right-0 top-full z-20 mt-2 w-64 rounded-xl border border-outline-variant/20 bg-surface-container-high p-4 shadow-xl">
+                            <label className="block text-xs font-semibold text-on-surface">
+                              Nueva posición: {targetOrders[chapter.id] ?? chapter.order} de {chapters.meta.totalItems}
+                              <input
+                                type="range"
+                                min={1}
+                                max={chapters.meta.totalItems}
+                                step={1}
+                                value={targetOrders[chapter.id] ?? chapter.order}
+                                onChange={(event) => setTargetOrders((current) => ({ ...current, [chapter.id]: Number(event.target.value) }))}
+                                className="mt-3 w-full cursor-pointer accent-primary"
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              disabled={updatingChapterOrder || (targetOrders[chapter.id] ?? chapter.order) === chapter.order}
+                              onClick={() => void onChapterOrderChange(chapter.id, targetOrders[chapter.id] ?? chapter.order)}
+                              className="mt-3 w-full cursor-pointer rounded-lg bg-primary px-3 py-2 text-sm font-bold text-on-primary transition-transform hover:scale-[0.98] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              Mover capítulo
+                            </button>
+                          </div>
+                        </details>
+                      )}
                       <button
+                        type="button"
+                        aria-label={`Editar ${chapter.title || `capítulo ${chapter.order}`}`}
                         onClick={() => navigate("/write", {
                           state: { chapterToEdit: chapter }
                         })}
@@ -520,6 +604,8 @@ const EditStory = () => {
                         </span>
                       </button>
                       <button
+                        type="button"
+                        aria-label={chapter.hidden ? "Publicar capítulo" : "Ocultar capítulo"}
                         onClick={() => onChapterToggleStatus(chapter.id)}
                         className="p-2 hover:bg-surface-variant rounded-lg text-on-surface-variant transition-colors cursor-pointer"
                       >
@@ -532,6 +618,8 @@ const EditStory = () => {
                         </span>
                       </button>
                       <button
+                        type="button"
+                        aria-label="Eliminar capítulo"
                         onClick={() => onChapterDeletion(chapter.id)}
                         className="p-2 hover:bg-surface-variant rounded-lg text-on-surface-variant transition-colors cursor-pointer"
                       >
@@ -554,56 +642,12 @@ const EditStory = () => {
                 )
               )}
             </div>
-            { chapters && chapters.data.length > 0 && (
-              <div className="flex items-center justify-center gap-2 mt-14">
-                {/** Previous Navigation */}
-                <button
-                  onClick={() => setPage(chapters?.meta.numberPage - 1)}
-                  className={`w-10 h-10 flex items-center justify-center rounded-xl border border-outline-variant/10 text-on-surface-variant
-                    ${chapters?.meta.numberPage !== 1 && "hover:bg-surface-variant/20 transition-colors cursor-pointer"}`}
-                  disabled={chapters?.meta.numberPage === 1}
-                >
-                  <span>
-                    <ChevronLeft size={24} />
-                  </span>
-                </button>
-                {/** Actual Page - 1 */}
-                {chapters?.meta.numberPage !== 1 && (
-                  <button
-                    onClick={() => setPage(chapters?.meta.numberPage - 1)}
-                    className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-surface-variant/20 text-on-surface transition-colors cursor-pointer"
-                  >
-                    {chapters?.meta.numberPage - 1}
-                  </button>
-                )}
-                {/** Actual Page */}
-                <button
-                  disabled={true}
-                  className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-on-primary font-bold cursor-default"
-                >
-                  {chapters?.meta.numberPage}
-                </button>
-                {/** Actual Page + 1 */}
-                {chapters?.meta.numberPage !== chapters?.meta.totalPages && (
-                  <button
-                    onClick={() => setPage(chapters?.meta.numberPage + 1)}
-                    className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-surface-variant/20 text-on-surface transition-colors cursor-pointer"
-                  >
-                    {chapters?.meta.numberPage + 1}
-                  </button>
-                )}
-                {/** Next Navigation */}
-                <button
-                  onClick={() => setPage(chapters?.meta.numberPage + 1)}
-                  className={`w-10 h-10 flex items-center justify-center rounded-xl border border-outline-variant/10 text-on-surface-variant
-                    ${chapters?.meta.numberPage !== chapters?.meta.totalPages && "hover:bg-surface-variant/20 transition-colors cursor-pointer"}`}
-                  disabled={chapters?.meta.numberPage === chapters?.meta.totalPages}
-                >
-                  <span>
-                    <ChevronRight size={24} />
-                  </span>
-                </button>
-              </div>
+            {chapters && (
+              <PageNavigator
+                page={chapters.meta.numberPage}
+                totalPages={chapters.meta.totalPages}
+                onPageChange={setPage}
+              />
             )}
           </section>
         </div>

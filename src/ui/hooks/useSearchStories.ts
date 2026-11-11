@@ -29,7 +29,7 @@ export const useSearchStories = ({ loadStories }: Props): UseSearchStoriesResult
   const searchForm = useForm<SearchFormValues>({
     resolver: zodResolver(searchSchema),
     defaultValues: {
-      offset: 1,
+      offset: 0,
       limit: 12,
       title: null,
       genreName: null,
@@ -66,7 +66,7 @@ export const useSearchStories = ({ loadStories }: Props): UseSearchStoriesResult
 
   const resetSearch = () => {
     searchForm.reset({
-      offset: 1,
+      offset: 0,
       limit: 12,
       title: null,
       genreName: null,

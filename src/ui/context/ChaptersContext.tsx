@@ -12,6 +12,7 @@ export interface ChaptersContextType {
   getOwnedChaptersByStory: (filters: ChaptersFilters, storyId: string) => Promise<PageResponse<ChapterInfo>>;
   createChapter: (createChapter: RegisterChapter) => Promise<boolean>;
   updateChapter: (updateChapter: UpdateChapter, chapterId: string) => Promise<boolean>;
+  moveChapterOrder: (chapterId: string, order: number) => Promise<boolean>;
   toggleChapterStatus: (chapterId: string) => Promise<boolean>;
   deleteChapter: (storyId: string, chapterId: string) => Promise<boolean>;
 }

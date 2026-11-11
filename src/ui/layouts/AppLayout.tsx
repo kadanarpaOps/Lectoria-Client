@@ -14,6 +14,7 @@ import Profile from "../pages/User/Profile";
 import AccountSettings from "../pages/User/AccountSettings";
 import AdminUsers from "../pages/Admin/AdminUsers";
 import Users from "../pages/User/Users";
+import PublicUserProfilePage from "../pages/User/PublicUserProfilePage";
 import Write from "../pages/User/Write";
 import RecoveryPassword from "../pages/Auth/RecoveryPassword";
 import { useAuth } from "../hooks/useAuth";
@@ -47,6 +48,7 @@ export default function AppLayout() {
           <Route path="/read" element={<Read />} />
           <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
+          <Route path="/users/:userId" element={<ProtectedRoute><PublicUserProfilePage /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
           <Route path="/write" element={<ProtectedRoute><Write /></ProtectedRoute>} />

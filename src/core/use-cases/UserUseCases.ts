@@ -1,6 +1,7 @@
 import {
   disableAccountRequest,
   pageUsersRequest,
+  getPublicUserProfileRequest,
   registerUserRequest,
   resetUserPasswordRequest,
   removeProfileImageRequest,
@@ -11,7 +12,7 @@ import {
 } from "../../infrastructure/api/requests/user.request";
 import type { RegisterUserRequest, ResetPasswordRequest } from "../domain/models/users/UserModel";
 import type { UserPort } from "../domain/ports/UserPort";
-import type { UserDirectoryPage } from "../domain/models/users/UserDirectoryModel";
+import type { PublicUserProfile, UserDirectoryPage } from "../domain/models/users/UserDirectoryModel";
 import type { UpdateEmailRequest, UpdatePasswordRequest, UpdateUsernameRequest } from "../domain/models/users/UserModel";
 
 export class UserService implements UserPort {
@@ -25,6 +26,10 @@ export class UserService implements UserPort {
 
   async pageUsers(pageNumber: number, pageSize: number, username?: string, userEmail?: string): Promise<UserDirectoryPage> {
     return pageUsersRequest(pageNumber, pageSize, username, userEmail);
+  }
+
+  async getPublicUserProfile(userId: string): Promise<PublicUserProfile> {
+    return getPublicUserProfileRequest(userId);
   }
 
   async updateUsername(request: UpdateUsernameRequest): Promise<void> {

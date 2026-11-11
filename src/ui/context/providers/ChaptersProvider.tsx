@@ -45,6 +45,13 @@ function ChaptersProvider({ children }: Props) {
     return true;
   }
 
+  const moveChapterOrder = async (chapterId: string, order: number) => {
+    setError(null);
+    const response = await executeTask(() => chapterService.moveChapterOrder(chapterId, order), setUpdating, setError, showAlert, true);
+    if (!response) return false;
+    return true;
+  }
+
   const toggleChapterStatus = async (chapterId: string) => {
     setError(null);
     const response = await executeTask(() => chapterService.toggleChapterStatus(chapterId), setLoading, setError, showAlert, true);
@@ -68,6 +75,7 @@ function ChaptersProvider({ children }: Props) {
     getOwnedChaptersByStory,
     createChapter,
     updateChapter,
+    moveChapterOrder,
     toggleChapterStatus,
     deleteChapter
   }

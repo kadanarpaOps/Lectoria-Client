@@ -5,6 +5,7 @@ export interface StoryPort {
     getAllGenres(): Promise<BasicInfo[]>;
     pageTags(offset: number, limit: number, tagName: string): Promise<PageResponse<BasicInfo>>;
     getStories(filters: StoryFilters): Promise<PageResponse<StoryInfo>>;
+    getPublicStoriesByUser(userId: string, filters: StoryFilters): Promise<PageResponse<StoryInfo>>;
     getAuthUserStories(filters: StoryFilters): Promise<PageResponse<StoryInfo>>;
     getAuthUserSavedStories(filters: StoryFilters): Promise<PageResponse<StoryInfo>>;
     getStoryById(storyId: string): Promise<StoryInfo>;

@@ -264,30 +264,29 @@ export default function VerificationDialog({
 
   const content = (
     <>
-        <div className="mb-6 flex items-start justify-between gap-4">
-          <div>
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-high-enfasis/10 text-high-enfasis">
-              <ShieldCheck size={25} />
-            </div>
-            <h2 className="text-2xl font-bold text-global">{title}</h2>
-            <p className="mt-2 leading-relaxed text-several-light">{description}</p>
-            {destinationEmail && (
-              <p className="mt-2 break-all text-sm font-medium text-high-enfasis">
-                Código enviado a {destinationEmail}
-              </p>
-            )}
-          </div>
+        <div className="relative mb-6 flex flex-col items-center text-center">
           {onClose && (
-            <button type="button" onClick={onClose} aria-label="Volver" className="text-several-light transition-transform duration-200 hover:scale-110 active:scale-90 hover:text-global">
+            <button type="button" onClick={onClose} aria-label="Volver" className="absolute right-0 top-0 cursor-pointer rounded-full p-2 text-several-light transition-all duration-200 hover:scale-110 hover:bg-high-enfasis/10 hover:text-global active:scale-90">
               <ArrowLeft size={20} />
             </button>
+          )}
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-high-enfasis/10 text-high-enfasis">
+            <ShieldCheck size={25} />
+          </div>
+          <h2 className="text-2xl font-bold text-global">{title}</h2>
+          <p className="mt-2 max-w-xl leading-relaxed text-several-light">{description}</p>
+          {destinationEmail && (
+            <p className="mt-2 break-all text-sm font-medium text-high-enfasis">
+              Código enviado a {destinationEmail}
+            </p>
           )}
         </div>
 
         <VerificationBreadcrumbs steps={steps} activeStep={activeStep} />
 
+        <div className="mx-auto w-full max-w-lg">
         {loading ? (
-          <p role="status" className="text-several-light">Preparando verificación...</p>
+          <p role="status" className="text-center text-several-light">Preparando verificación...</p>
         ) : verificationReady && !verificationExpired && codeVerified && verifiedContent ? (
           <form
             className="space-y-5"
@@ -332,7 +331,7 @@ export default function VerificationDialog({
               <button
                 type="submit"
                 disabled={submitting || !verificationReady || code.length !== 6}
-                className="w-full rounded-full bg-high-enfasis py-3.5 font-semibold text-white transition-transform duration-200 hover:scale-[0.98] active:scale-95 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+                className="w-full cursor-pointer rounded-full bg-high-enfasis py-3.5 font-semibold text-on-primary-fixed shadow-lg shadow-high-enfasis/20 transition-all duration-300 hover:scale-[0.98] hover:bg-high-enfasis/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
               >
                 {submitting ? "Verificando..." : "Verificar código"}
               </button>
@@ -342,7 +341,7 @@ export default function VerificationDialog({
                 type="button"
                 onClick={regenerate}
                 disabled={submitting || now == null || remainingCode > 0 || resendLimitReached}
-                className="group flex w-full items-center justify-center gap-2 rounded-full border border-toolbar-bg/15 py-3 font-semibold text-global transition-transform duration-200 hover:scale-[0.98] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+                className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-toolbar-bg/15 py-3 font-semibold text-global transition-all duration-300 hover:scale-[0.98] hover:border-high-enfasis/40 hover:bg-high-enfasis/5 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
               >
                 <RotateCw size={16} className="transition-transform duration-300 group-hover:rotate-180" />
                 {resendLimitReached
@@ -367,7 +366,7 @@ export default function VerificationDialog({
             <button
               type="submit"
               disabled={submitting || verificationExpired}
-              className="w-full rounded-full bg-high-enfasis py-3.5 font-semibold text-white transition-transform duration-200 hover:scale-[0.98] active:scale-95 hover:opacity-90 disabled:opacity-50 disabled:hover:scale-100"
+              className="w-full cursor-pointer rounded-full bg-high-enfasis py-3.5 font-semibold text-on-primary-fixed shadow-lg shadow-high-enfasis/20 transition-all duration-300 hover:scale-[0.98] hover:bg-high-enfasis/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
             >
               {submitting ? "Procesando..." : "Completar operación"}
             </button>
@@ -381,14 +380,15 @@ export default function VerificationDialog({
         )}
 
         {message && verificationReady && <p role="status" className="mt-4 text-sm text-red-300">{message}</p>}
+        </div>
     </>
   );
 
   return embedded
-    ? <section className="flex min-h-[min(720px,calc(100dvh-3rem))] max-h-[calc(100dvh-3rem)] w-full max-w-3xl flex-col overflow-y-auto rounded-3xl border border-toolbar-bg/10 bg-background-global p-8 shadow-2xl sm:p-10">{content}</section>
+    ? <section className="flex min-h-[min(34rem,calc(100dvh-2rem))] max-h-[calc(100dvh-2rem)] w-full max-w-3xl flex-col justify-center overflow-y-auto rounded-3xl border border-toolbar-bg/10 bg-background-global p-5 shadow-2xl sm:p-8 lg:p-10">{content}</section>
     : (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-        <section className="w-full max-w-lg rounded-3xl border border-toolbar-bg/10 bg-background-global p-7 shadow-2xl">{content}</section>
+      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 p-3 backdrop-blur-sm sm:p-6">
+        <section className="my-auto w-full max-w-2xl rounded-3xl border border-toolbar-bg/10 bg-background-global p-5 shadow-2xl sm:p-8 lg:p-10">{content}</section>
       </div>
     );
 }

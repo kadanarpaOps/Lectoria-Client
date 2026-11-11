@@ -40,3 +40,7 @@ export const updateChapterRequest = async (chapterId: string, updateChapter: Upd
   const response = await storyClient.patch(`api/chapter/update/${chapterId}`, updateChapter);
   return response.data;
 }
+
+export const moveChapterOrderRequest = async (chapterId: string, order: number): Promise<void> => {
+  await storyClient.patch(`api/chapter/order/${chapterId}`, { order });
+}

@@ -7,12 +7,13 @@ import type { searchSchema } from "../../schemas/stories/stories.schema";
 import type z from "zod";
 import SelectCategoryModal from "../stories/SelectCategoryModal";
 import SelectNewStatusModal from "../stories/SelectNewStatusModal";
-import { Bolt, ChevronLeft, ChevronRight, Cog, LineSquiggle, Plus, RotateCcw, Search, SlidersHorizontal, X } from "lucide-react";
+import { Bolt, Cog, LineSquiggle, Plus, RotateCcw, Search, SlidersHorizontal, X } from "lucide-react";
 import { GenreIcon } from "../stories/GenresIcons";
 import { StatusIcon } from "../stories/StatusesIcons";
 import { BookCard } from "../../pages/landing/LandingPage";
 import { getRandomColor } from "../../pages/utils/colors.util";
 import type { PageResponse } from "../../../core/domain/models/common/PaginationModels";
+import PageNavigator from "./PageNavigator";
 
 type SearchFormValues = z.infer<typeof searchSchema>;
 
@@ -30,7 +31,7 @@ const ExploreSection = ({ loadStories, loading, routeAction }: Props) => {
     const [ searchParams ] = useSearchParams();
     // Use Search Stories
     const { searchForm, resultStories, handleSearch, resetSearch } = useSearchStories({ loadStories });
-    const [ page, setPage ] = useState<number>(1);
+    const [ page, setPage ] = useState<number>(0);
     // Use Form
     const { handleSubmit, reset, control, setValue } = searchForm;
 
@@ -49,7 +50,6 @@ const ExploreSection = ({ loadStories, loading, routeAction }: Props) => {
       setIsSelectingGenreOrSubgenre(null)
     };
     const handleSelectStatus = (value: StatusNames) => {
-        console.log(value)
         setValue("status", value);
         setIsSelectingStatus(false);
     };
@@ -58,7 +58,7 @@ const ExploreSection = ({ loadStories, loading, routeAction }: Props) => {
     useEffect(() => {
         const initialSearch = async () => {
             await handleSearch({
-                offset: 1,
+                offset: 0,
                 limit: 12,
                 title: null,
                 genreName: null,
@@ -75,7 +75,7 @@ const ExploreSection = ({ loadStories, loading, routeAction }: Props) => {
     const onSubmit = useCallback(async (data: SearchFormValues) => {
       const titleParam = searchParams.get("title") || "";
 
-      data.offset = page;
+      data.offset = page * 12;
       await handleSearch({ ...data, title: titleParam !== "" ? titleParam : null, limit: 12});
     }, [handleSearch, page, searchParams]); 
 
@@ -118,10 +118,10 @@ const ExploreSection = ({ loadStories, loading, routeAction }: Props) => {
     const clearFilters = async () => {
         resetSearch();
         reset();
-        setPage(1);
+        setPage(0);
         const titleParam = searchParams.get("title") || "";
         await handleSearch({
-            offset: 1,
+            offset: 0,
             limit: 12,
             title: titleParam !== "" ? titleParam : null,
             genreName: null,
@@ -362,55 +362,11 @@ const ExploreSection = ({ loadStories, loading, routeAction }: Props) => {
                             </div>
                         ))}
                         <div className="col-span-full">
-                            <div className="flex flex-wrap items-center justify-center gap-2 mt-10 sm:mt-14">
-                              {/** Previous Navigation */}
-                              <button
-                                onClick={() => setPage(resultStories?.meta.numberPage - 1)}
-                                className={`w-10 h-10 flex items-center justify-center rounded-xl border border-outline-variant/10 text-on-surface-variant
-                                  ${resultStories?.meta.numberPage !== 1 && "hover:bg-surface-variant/20 transition-colors cursor-pointer"}`}
-                                disabled={resultStories?.meta.numberPage === 1}
-                              >
-                                <span>
-                                  <ChevronLeft size={24} />
-                                </span>
-                              </button>
-                              {/** Actual Page - 1 */}
-                              {resultStories?.meta.numberPage !== 1 && (
-                                <button
-                                  onClick={() => setPage(resultStories?.meta.numberPage - 1)}
-                                  className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-surface-variant/20 text-on-surface transition-colors cursor-pointer"
-                                >
-                                  {resultStories?.meta.numberPage - 1}
-                                </button>
-                              )}
-                              {/** Actual Page */}
-                              <button
-                                disabled={true}
-                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-on-primary font-bold cursor-default"
-                              >
-                                {resultStories?.meta.numberPage}
-                              </button>
-                              {/** Actual Page + 1 */}
-                              {resultStories?.meta.numberPage !== resultStories?.meta.totalPages && (
-                                <button
-                                  onClick={() => setPage(resultStories?.meta.numberPage + 1)}
-                                  className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-surface-variant/20 text-on-surface transition-colors cursor-pointer"
-                                >
-                                  {resultStories?.meta.numberPage + 1}
-                                </button>
-                              )}
-                              {/** Next Navigation */}
-                              <button
-                                onClick={() => setPage(resultStories?.meta.numberPage + 1)}
-                                className={`w-10 h-10 flex items-center justify-center rounded-xl border border-outline-variant/10 text-on-surface-variant
-                                  ${resultStories?.meta.numberPage !== resultStories?.meta.totalPages && "hover:bg-surface-variant/20 transition-colors cursor-pointer"}`}
-                                disabled={resultStories?.meta.numberPage === resultStories?.meta.totalPages}
-                              >
-                                <span>
-                                  <ChevronRight size={24} />
-                                </span>
-                              </button>
-                            </div>
+                          <PageNavigator
+                           page={resultStories.meta.numberPage}
+                           totalPages={resultStories.meta.totalPages}
+                           onPageChange={setPage}
+                          />
                         </div>
                     </div>
                 ) : (

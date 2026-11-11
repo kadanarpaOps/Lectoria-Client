@@ -6,6 +6,7 @@ export interface ChapterPort {
   getOwnedChaptersByStory(filters: ChaptersFilters, storyId: string): Promise<PageResponse<ChapterInfo>>;
   createChapter(createChapter: RegisterChapter): Promise<void>;
   updateChapter(updateChapter: UpdateChapter, chapterId: string): Promise<void>;
+  moveChapterOrder(chapterId: string, order: number): Promise<boolean>;
   toggleChapterStatus(chapterId: string): Promise<void>;
   deleteChapter(storyId: string, chapterId: string): Promise<void>;
 }

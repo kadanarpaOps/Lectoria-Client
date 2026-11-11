@@ -22,6 +22,7 @@ export interface StoriesContextType {
     loadStoriesForAuthUser: (filters: StoryFilters) => Promise<PageResponse<StoryInfo>>;
     loadStoryById: (storyId: string) => Promise<StoryInfo>;
     loadPublishedStories: (filters: StoryFilters) => Promise<PageResponse<StoryInfo>>; //Acabar de implementar estos 3 load en el context, hacer un useSearch y hacer la página de Explore dinámica pa que llene esos filters :p
+    loadPublicStoriesByUser: (userId: string, filters: StoryFilters) => Promise<PageResponse<StoryInfo>>;
     loadLastModifiedStoryForAuthUser: () => Promise<LastModifiedStory>;
     loadAuthUserFavorites: (filters: StoryFilters) => Promise<PageResponse<StoryInfo>>;
     // Favorites

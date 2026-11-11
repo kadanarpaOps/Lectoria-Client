@@ -2,11 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Search, UserRound, UsersRound } from "lucide-react";
 import { UserService } from "../../../core/use-cases/UserUseCases";
 import type { UserDirectoryEntry } from "../../../core/domain/models/users/UserDirectoryModel";
+import { useNavigate } from "react-router";
 
 const userService = new UserService();
 const PAGE_SIZE = 10;
 
 export default function Users() {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<UserDirectoryEntry[]>([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -84,18 +86,23 @@ export default function Users() {
         ) : users.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-toolbar-bg/20 p-10 text-center text-several-light">No hay resultados para mostrar.</div>
         ) : users.map((user) => (
-          <article key={user.userId} className="flex items-center gap-3 sm:gap-4 rounded-3xl border border-toolbar-bg/10 bg-background-global p-4 sm:p-5">
+          <button
+            type="button"
+            key={user.userId}
+            onClick={() => navigate(`/users/${user.userId}`)}
+            className="flex w-full cursor-pointer items-center gap-3 rounded-3xl border border-toolbar-bg/10 bg-background-global p-4 text-left transition-all hover:border-high-enfasis/30 hover:bg-high-enfasis/5 active:scale-[0.99] sm:gap-4 sm:p-5"
+            aria-label={`Ver perfil de ${user.username}`}
+          >
             <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-inputs-bg">
-              {user.userDetails?.profileImageUrl
-                ? <img src={user.userDetails.profileImageUrl} alt={`Perfil de ${user.username}`} className="h-full w-full object-cover" />
+              {user.profileImageUrl
+                ? <img src={user.profileImageUrl} alt={`Perfil de ${user.username}`} className="h-full w-full object-cover" />
                 : <UserRound className="text-several-light" size={25} />}
             </div>
             <div className="min-w-0">
               <h2 className="truncate font-semibold text-global">{user.username}</h2>
-              <p className="break-all text-sm text-several-light">{user.email}</p>
-              <p className="mt-1 text-xs text-high-enfasis">{user.userRoles.join(" · ")}</p>
+              <p className="mt-1 text-sm text-several-light">Ver perfil e historias</p>
             </div>
-          </article>
+          </button>
         ))}
       </section>
 

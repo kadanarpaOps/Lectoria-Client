@@ -1,4 +1,4 @@
-import { createChapterRequest, deleteChapterRequest, getChaptersByStoryRequest, getOwnedChaptersByStoryRequest, toggleChapterStatusRequest, updateChapterRequest } from "../../../infrastructure/api/requests/chapters/chapters.request";
+import { createChapterRequest, deleteChapterRequest, getChaptersByStoryRequest, getOwnedChaptersByStoryRequest, moveChapterOrderRequest, toggleChapterStatusRequest, updateChapterRequest } from "../../../infrastructure/api/requests/chapters/chapters.request";
 import type { PageResponse } from "../../domain/models/common/PaginationModels";
 import type { ChapterInfo, ChaptersFilters, RegisterChapter, UpdateChapter } from "../../domain/models/chapters/ChapterModel";
 import type { ChapterPort } from "../../domain/ports/chapters/ChapterPort";
@@ -23,6 +23,11 @@ export class ChapterService implements ChapterPort {
   async updateChapter(updateChapter: UpdateChapter, chapterId: string): Promise<void> {
     const response = await updateChapterRequest(chapterId, updateChapter);
     return response;
+  }
+
+  async moveChapterOrder(chapterId: string, order: number): Promise<boolean> {
+    await moveChapterOrderRequest(chapterId, order);
+    return true;
   }
 
   async toggleChapterStatus(chapterId: string): Promise<void> {

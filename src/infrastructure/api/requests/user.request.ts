@@ -5,7 +5,7 @@ import type {
   UpdatePasswordRequest,
   UpdateUsernameRequest,
 } from "../../../core/domain/models/users/UserModel";
-import type { UserDirectoryPage } from "../../../core/domain/models/users/UserDirectoryModel";
+import type { PublicUserProfile, UserDirectoryPage } from "../../../core/domain/models/users/UserDirectoryModel";
 import httpClient from "../config/axios.instance";
 
 export interface UserProfileResponse {
@@ -48,6 +48,11 @@ export const pageUsersRequest = async (
       ...(userEmail ? { userEmail } : {}),
     },
   });
+  return response.data;
+};
+
+export const getPublicUserProfileRequest = async (userId: string): Promise<PublicUserProfile> => {
+  const response = await httpClient.get(`users/${userId}/public-profile`);
   return response.data;
 };
 
