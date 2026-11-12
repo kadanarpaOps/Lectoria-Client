@@ -245,11 +245,6 @@ const EditStory = () => {
 
       { story && !modifiedStory ? (
         <div className="w-full min-w-0 p-4 sm:p-8 lg:p-14 xl:px-30 max-w-7xl mx-auto space-y-10 sm:space-y-16">
-          <div className="flex justify-end">
-            <button type="button" onClick={() => setManageCoauthors(true)} className="flex cursor-pointer items-center gap-2 rounded-xl border border-primary/30 bg-surface-container-low px-4 py-3 font-semibold text-on-surface transition hover:bg-primary/10 active:scale-95">
-              <UsersRound size={18} /> Gestionar coautores
-            </button>
-          </div>
           {manageCoauthors && <StoryCoauthorPanel storyId={story.id} onClose={() => setManageCoauthors(false)} />}
           <section className="relative">
             <nav className="hidden xl:flex fixed top-26 right-8 2xl:right-20 flex-col gap-2 z-10">
@@ -301,46 +296,51 @@ const EditStory = () => {
               {/** Modify Title and Description */}
               <div className="flex-1 min-w-0 w-full space-y-8">
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    {!isEditingTitle ? (
-                      <h1
-                        onClick={() => setIsEditingTitle(true)}
-                        className="text-3xl sm:text-5xl font-display font-extrabold py-3 tracking-tight text-fujiWhite group cursor-pointer inline-flex items-start gap-3 transition-all break-words max-w-full"
-                      >
-                        {story.title}
-                        <span className="text-primary/40 group-hover:text-primary transition-colors">
-                          <Pencil size={24} />
-                        </span>
-                      </h1>
-                    ) : (
-                      <div className="inline-flex items-center gap-2 sm:gap-4 w-full max-w-3xl min-w-0">
-                        <input
-                          {...register("title")}
-                          type="text"
-                          className="text-3xl sm:text-5xl font-display font-extrabold tracking-tight bg-transparent border-b-2 border-global/60 text-fujiWhite outline-none w-full min-w-0 animate-in fade-in duration-300"
-                        />
-                        <div className="flex gap-2">
-                          <button
-                            onClick={handleSubmit(async (data) => {
-                              const success = await onSubmit(data);
-                              if (success) setIsEditingTitle(false);
-                            })}
-                            className="text-primary/40 hover:text-primary transition-colors cursor-pointer"
-                          >
-                            <Check size={24} />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setValue("title", story?.title);
-                              setIsEditingTitle(false);
-                            }}
-                            className="text-primary/40 hover:text-primary transition-colors cursor-pointer"
-                          >
-                            <RotateCcw size={24} />
-                          </button>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      {!isEditingTitle ? (
+                        <h1
+                          onClick={() => setIsEditingTitle(true)}
+                          className="text-3xl sm:text-5xl font-display font-extrabold py-3 tracking-tight text-fujiWhite group cursor-pointer inline-flex items-start gap-3 transition-all break-words max-w-full"
+                        >
+                          {story.title}
+                          <span className="text-primary/40 group-hover:text-primary transition-colors">
+                            <Pencil size={24} />
+                          </span>
+                        </h1>
+                      ) : (
+                        <div className="inline-flex items-center gap-2 sm:gap-4 w-full max-w-3xl min-w-0">
+                          <input
+                            {...register("title")}
+                            type="text"
+                            className="text-3xl sm:text-5xl font-display font-extrabold tracking-tight bg-transparent border-b-2 border-global/60 text-fujiWhite outline-none w-full min-w-0 animate-in fade-in duration-300"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleSubmit(async (data) => {
+                                const success = await onSubmit(data);
+                                if (success) setIsEditingTitle(false);
+                              })}
+                              className="text-primary/40 hover:text-primary transition-colors cursor-pointer"
+                            >
+                              <Check size={24} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setValue("title", story?.title);
+                                setIsEditingTitle(false);
+                              }}
+                              className="text-primary/40 hover:text-primary transition-colors cursor-pointer"
+                            >
+                              <RotateCcw size={24} />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
+                    <button type="button" onClick={() => setManageCoauthors(true)} className="flex shrink-0 cursor-pointer items-center justify-center gap-2 self-start rounded-xl border border-primary/30 bg-surface-container-low px-4 py-3 font-semibold text-on-surface transition hover:bg-primary/10 active:scale-95 sm:self-auto">
+                      <UsersRound size={18} /> Gestionar coautores
+                    </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 w-full max-w-3xl">
                     <button

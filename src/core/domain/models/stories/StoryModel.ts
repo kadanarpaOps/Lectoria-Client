@@ -24,6 +24,7 @@ export interface StoryInfo {
     secondaryGenre: BasicInfo;
     tags: BasicInfo[];
     userId: string;
+    username: string;
     // Average Rating
     totalRating: number;
     // User that has Rated

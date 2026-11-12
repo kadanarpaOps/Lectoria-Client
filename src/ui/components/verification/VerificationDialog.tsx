@@ -149,7 +149,13 @@ export default function VerificationDialog({
           && current.destinationEmail !== destinationEmail;
         if (current.exists && !destinationChanged) return current;
         if (!current.exists && !createIfMissing) return current;
-        await verificationService.create(verificationRequest);
+        try {
+          await verificationService.create(verificationRequest);
+        } catch (creationError) {
+          const latest = await verificationService.exists(identity);
+          if (latest.exists) return latest;
+          throw creationError;
+        }
         return verificationService.exists(identity);
       });
       preparationRef.current = { key, promise };

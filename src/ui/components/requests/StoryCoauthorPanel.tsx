@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
+import { isAxiosError } from "axios";
 import { UserRoundPlus, X } from "lucide-react";
+import { createPortal } from "react-dom";
 import { getStoryCoauthors, inviteCoauthor, removeStoryCoauthor, type Coauthor } from "../../../infrastructure/api/requests/requests.request";
 
 type Props = { storyId: string; onClose: () => void };
@@ -36,8 +38,10 @@ export default function StoryCoauthorPanel({ storyId, onClose }: Props) {
       await inviteCoauthor(storyId, username.trim());
       setUsername("");
       setError(null);
-    } catch {
-      setError("No se pudo enviar la invitación. Verifica el usuario o si ya hay una solicitud pendiente.");
+    } catch (error) {
+      setError(isAxiosError<{ message?: string }>(error)
+        ? error.response?.data?.message ?? "No se pudo enviar la invitación. Verifica el usuario o si ya hay una solicitud pendiente."
+        : "No se pudo enviar la invitación. Comprueba tu conexión e inténtalo nuevamente.");
     } finally {
       setBusy(false);
     }
@@ -55,7 +59,7 @@ export default function StoryCoauthorPanel({ storyId, onClose }: Props) {
     }
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="coauthors-title">
       <section className="w-full max-w-xl rounded-3xl border border-toolbar-bg/20 bg-background-global p-5 shadow-2xl sm:p-7">
         <header className="mb-6 flex items-start justify-between gap-4">
@@ -88,6 +92,7 @@ export default function StoryCoauthorPanel({ storyId, onClose }: Props) {
           </ul>
         ) : <p className="rounded-xl bg-surface-container-low p-4 text-sm text-several-light">Aún no hay coautores.</p>}
       </section>
-    </div>
+    </div>,
+    document.body
   );
 }
