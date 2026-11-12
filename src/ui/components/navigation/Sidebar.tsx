@@ -1,4 +1,4 @@
-import { BookCopy, CircleUserRound, Compass, Settings, SquarePen, UsersRound } from "lucide-react";
+import { BookCopy, CircleUserRound, Compass, Inbox, Settings, SquarePen, UsersRound } from "lucide-react";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
@@ -78,11 +78,23 @@ const Sidebar = ({ isSidebarOpen, isMobile, onClose }: SidebarProps) => {
               <span>Comunidad</span>
             </a>
           )}
-          {isAdmin && (
-            <a className={navigationClass("/admin")} onClick={() => navigateTo("/admin/users")}>
-              <UsersRound size={26} />
-              <span>Administración</span>
+          {authUser && (
+            <a className={navigationClass("/requests")} onClick={() => navigateTo("/requests")}>
+              <Inbox size={25} />
+              <span>Solicitudes</span>
             </a>
+          )}
+          {isAdmin && (
+            <>
+              <a className={navigationClass("/admin/users")} onClick={() => navigateTo("/admin/users")}>
+                <UsersRound size={26} />
+                <span>Administración</span>
+              </a>
+              <a className={navigationClass("/admin/requests")} onClick={() => navigateTo("/admin/requests")}>
+                <Inbox size={25} />
+                <span>Solicitudes de cuenta</span>
+              </a>
+            </>
           )}
           {authUser && (
             <a className={navigationClass("/settings")} onClick={() => navigateTo("/settings")}>

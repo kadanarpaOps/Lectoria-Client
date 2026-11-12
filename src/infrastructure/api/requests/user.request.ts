@@ -83,6 +83,10 @@ export const disableAccountRequest = async (): Promise<void> => {
   await httpClient.patch("auth/user/disable-account");
 };
 
+export const reactivateAccountRequest = async (request: ResetPasswordRequest): Promise<void> => {
+  await httpClient.patch("auth/user/activate-account", request);
+};
+
 export const verifyRegistrationRequest = async (username?: string, email?: string): Promise<void> => {
   await httpClient.post("users/verify-registry", null, {
     params: username ? { username } : { email },

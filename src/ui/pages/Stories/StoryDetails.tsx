@@ -4,13 +4,14 @@ import { useAuth } from "../../hooks/useAuth";
 import { useEffect, useState } from "react";
 import type { StoryInfo } from "../../../core/domain/models/stories/StoryModel";
 import { getRandomCover } from "../utils/covers.util";
-import { Bookmark, BookOpen, Clock, Info, List, MessageSquareText, Pencil } from "lucide-react";
+import { Bookmark, BookOpen, Clock, Info, List, MessageSquareText, Pencil, UserRoundPlus } from "lucide-react";
 import { useChapters } from "../../hooks/useChapters";
 import type { PageResponse } from "../../../core/domain/models/common/PaginationModels";
 import type { ChapterInfo } from "../../../core/domain/models/chapters/ChapterModel";
 import { countTotalWords, parseTiptapContent, renderWithoutFormat } from "../utils/renderTiptap.util";
 import { getLastModifiedTime } from "../utils/time.util";
 import CommentsSection from "../../components/stories/CommentsSection";
+import { createCoauthorRequest } from "../../../infrastructure/api/requests/requests.request";
 
 const StoryDetails = () => {
 
@@ -29,6 +30,8 @@ const StoryDetails = () => {
   const [ favorite, setFavorite ] = useState<boolean>(false);
   const [ chapters, setChapters ] = useState<PageResponse<ChapterInfo> | null>(null);
   const [ totalItemsChapters, setTotalChaptersItems ] = useState<number | null>(null)
+  const [ coauthorRequestSent, setCoauthorRequestSent ] = useState(false);
+  const [ coauthorRequestError, setCoauthorRequestError ] = useState<string | null>(null);
   const isOwnStory = Boolean(authUser && story?.userId === authUser.userId);
 
   useEffect(() => {
@@ -71,6 +74,16 @@ const StoryDetails = () => {
       setFavorite(responseFavorite);
     }
   }
+  const handleCoauthorRequest = async () => {
+    if (!story) return;
+    try {
+      await createCoauthorRequest(story.id);
+      setCoauthorRequestSent(true);
+      setCoauthorRequestError(null);
+    } catch {
+      setCoauthorRequestError("No se pudo enviar la solicitud. Puede que ya exista una pendiente.");
+    }
+  };
 
   return (
     <main className="relative h-full">
@@ -146,7 +159,19 @@ const StoryDetails = () => {
                         { !favorite ? "Guardar" : "Eliminar"}
                       </button>
                   )}
+                  { authUser && !isOwnStory && (
+                    <button
+                      type="button"
+                      disabled={coauthorRequestSent}
+                      onClick={() => void handleCoauthorRequest()}
+                      className="flex cursor-pointer items-center gap-2 rounded-xl border border-primary/30 bg-surface-container-low px-5 py-3 font-bold text-on-surface transition hover:bg-primary/10 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <UserRoundPlus size={19} />
+                      {coauthorRequestSent ? "Solicitud enviada" : "Solicitar coautoría"}
+                    </button>
+                  )}
                 </div>
+                {coauthorRequestError && <p role="alert" className="pt-2 text-sm text-red-400">{coauthorRequestError}</p>}
               </div>
               {/** Page Navigation */}
               <nav className="hidden xl:flex flex-col gap-2 p-2 bg-surface-container-high/40 rounded-2xl sticky top-24 border border-outline-variant/5">

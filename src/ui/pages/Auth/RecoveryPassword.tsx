@@ -7,6 +7,8 @@ import VerificationDialog from "../../components/verification/VerificationDialog
 import VerificationBreadcrumbs from "../../components/verification/VerificationBreadcrumbs";
 import { useAuth } from "../../hooks/useAuth";
 import { verifyRegistrationRequest } from "../../../infrastructure/api/requests/user.request";
+import { reactivateAccountRequest } from "../../../infrastructure/api/requests/user.request";
+import { requestAccountReactivation } from "../../../infrastructure/api/requests/requests.request";
 
 const userService = new UserService();
 
@@ -15,25 +17,48 @@ export default function RecoveryPassword() {
   const location = useLocation();
   const navigate = useNavigate();
   const resumeRegistration = new URLSearchParams(location.search).get("mode") === "registry";
+  const resumeReactivation = new URLSearchParams(location.search).get("mode") === "reactivate";
   const identitySteps = resumeRegistration
     ? ["Buscar registro", "Código"]
-    : ["Identificación", "Código", "Nueva contraseña"];
-  const [identityType, setIdentityType] = useState<"username" | "userEmail">("userEmail");
-  const [identity, setIdentity] = useState("");
+    : resumeReactivation ? ["Solicitar reactivación", "Código", "Nueva contraseña"] : ["Identificación", "Código", "Nueva contraseña"];
+  const storedReactivationIdentity = (() => {
+    try { return JSON.parse(localStorage.getItem("lectoria-reactivation-identity") || "null") as { username?: string; userEmail?: string } | null; }
+    catch { return null; }
+  })();
+  const [identityType, setIdentityType] = useState<"username" | "userEmail">(storedReactivationIdentity?.username ? "username" : "userEmail");
+  const [identity, setIdentity] = useState(storedReactivationIdentity?.username ?? storedReactivationIdentity?.userEmail ?? "");
+  const [reactivationSent, setReactivationSent] = useState(Boolean(localStorage.getItem("lectoria-reactivation-user-id")));
   const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
-  const requestVerification = (event: React.FormEvent<HTMLFormElement>) => {
+  const requestVerification = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const value = identity.trim();
     if (!value) return;
     setPasswordError(null);
+    if (resumeReactivation) {
+      try {
+        const request = await requestAccountReactivation({ [identityType]: value });
+        localStorage.setItem("lectoria-reactivation-user-id", request.sourceUserId);
+        localStorage.setItem("lectoria-reactivation-identity", JSON.stringify({ [identityType]: value }));
+        setReactivationSent(true);
+      } catch {
+        setPasswordError("No se pudo enviar la solicitud. Comprueba los datos o si ya hay una solicitud pendiente.");
+      }
+      return;
+    }
     setVerificationRequest({
       [identityType]: value,
       verificationType: resumeRegistration ? "VERIFY_REGISTRY" : "FORGOT_PASSWORD",
     });
+  };
+
+  const continueReactivation = () => {
+    const optionalUserId = localStorage.getItem("lectoria-reactivation-user-id");
+    if (!optionalUserId) return;
+    setVerificationRequest({ optionalUserId, verificationType: "REACTIVATE_ACCOUNT" });
   };
 
   const completePasswordReset = async () => {
@@ -43,11 +68,22 @@ export default function RecoveryPassword() {
       throw new Error("Passwords do not match");
     }
     setPasswordError(null);
-    await userService.resetPassword({
-      username: verificationRequest.username,
-      userEmail: verificationRequest.userEmail,
+    const resetRequest = {
+      username: resumeReactivation
+        ? (identityType === "username" ? identity.trim() : undefined)
+        : verificationRequest.username,
+      userEmail: resumeReactivation
+        ? (identityType === "userEmail" ? identity.trim() : undefined)
+        : verificationRequest.userEmail,
       newPassword: password,
-    });
+    };
+    if (resumeReactivation) {
+      await reactivateAccountRequest(resetRequest);
+      localStorage.removeItem("lectoria-reactivation-user-id");
+      localStorage.removeItem("lectoria-reactivation-identity");
+    } else {
+      await userService.resetPassword(resetRequest);
+    }
     navigate("/auth", { replace: true, state: { passwordReset: true } });
   };
 
@@ -57,11 +93,12 @@ export default function RecoveryPassword() {
         <VerificationDialog
           embedded
           request={verificationRequest}
-          title={resumeRegistration ? "Continúa tu registro" : "Verifica tu identidad"}
+          title={resumeRegistration ? "Continúa tu registro" : resumeReactivation ? "Reactiva tu cuenta" : "Verifica tu identidad"}
           description={resumeRegistration
             ? "Introduce el código enviado al correo de tu registro para terminar de activar la cuenta."
-            : "Introduce el código enviado para continuar con la recuperación de tu contraseña."}
-          createIfMissing={!resumeRegistration}
+            : resumeReactivation ? "Introduce el código enviado al correo para reactivar tu cuenta."
+              : "Introduce el código enviado para continuar con la recuperación de tu contraseña."}
+          createIfMissing={!resumeRegistration && !resumeReactivation}
           completeWhenVerified={resumeRegistration}
           maxRegenerations={resumeRegistration ? 1 : undefined}
           stepLabels={resumeRegistration ? identitySteps : undefined}
@@ -119,7 +156,7 @@ export default function RecoveryPassword() {
 
       <section className={`${verificationRequest ? "hidden" : ""} w-full max-w-xl rounded-3xl border border-toolbar-bg/10 bg-background-global p-8 shadow-2xl`}>
         <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-high-enfasis/10 text-high-enfasis"><KeyRound /></div>
-        <h1 className="text-3xl font-bold text-global">{resumeRegistration ? "Retomar registro" : "Recuperar acceso"}</h1>
+        <h1 className="text-3xl font-bold text-global">{resumeRegistration ? "Retomar registro" : resumeReactivation ? "Reactivar cuenta" : "Recuperar acceso"}</h1>
         {authUser ? (
           <div className="mt-5 space-y-4">
             <p className="text-several-light">La recuperación mediante código es un flujo público. Como ya iniciaste sesión, puedes cambiar tu contraseña desde los ajustes de seguridad.</p>
@@ -130,7 +167,9 @@ export default function RecoveryPassword() {
             <p className="mt-3 text-several-light">
               {resumeRegistration
                 ? "Busca la verificación pendiente para continuar con el registro."
-                : "Elige un único dato para localizar tu cuenta. Te enviaremos un código antes de permitirte cambiar la contraseña."}
+                : resumeReactivation
+                  ? "Indica tu usuario o correo para solicitar al equipo administrador la reactivación de tu cuenta."
+                  : "Elige un único dato para localizar tu cuenta. Te enviaremos un código antes de permitirte cambiar la contraseña."}
             </p>
             <div className="mt-6">
               <VerificationBreadcrumbs steps={identitySteps} activeStep={0} />
@@ -159,10 +198,19 @@ export default function RecoveryPassword() {
                   placeholder={identityType === "username" ? "Tu nombre de usuario" : "tu@correo.com"}
                 />
               </label>
-              <button type="submit" className="w-full rounded-full bg-high-enfasis py-3.5 font-semibold text-white transition hover:opacity-90">
-                {resumeRegistration ? "Buscar registro pendiente" : "Continuar"}
+              {passwordError && <p role="alert" className="text-sm text-red-400">{passwordError}</p>}
+              <button type="submit" className="w-full cursor-pointer rounded-full bg-high-enfasis py-3.5 font-semibold text-white transition hover:opacity-90 active:scale-[0.99]">
+                {resumeRegistration ? "Buscar registro pendiente" : resumeReactivation ? "Solicitar reactivación" : "Continuar"}
               </button>
             </form>
+            {resumeReactivation && reactivationSent && (
+              <div className="mt-4 rounded-xl border border-high-enfasis/20 bg-high-enfasis/5 p-4">
+                <p className="text-sm text-several-light">Solicitud registrada. Cuando un administrador la gestione, podrás continuar con el código enviado a tu correo.</p>
+                <button type="button" onClick={continueReactivation} className="mt-3 w-full cursor-pointer rounded-full border border-high-enfasis/40 px-4 py-3 font-semibold text-high-enfasis transition hover:bg-high-enfasis/10 active:scale-[0.99]">
+                  Ya recibí el código
+                </button>
+              </div>
+            )}
             <Link to="/auth" className="mt-5 inline-flex items-center gap-2 text-sm text-several-light hover:text-global"><ArrowLeft size={16} /> Volver al inicio de sesión</Link>
           </>
         )}

@@ -19,6 +19,8 @@ import type { PageResponse } from "../../../core/domain/models/common/Pagination
 import type { ChapterInfo } from "../../../core/domain/models/chapters/ChapterModel";
 import { countTotalWords, parseTiptapContent, renderWithoutFormat } from "../utils/renderTiptap.util";
 import PageNavigator from "../../components/navigation/PageNavigator";
+import { UsersRound } from "lucide-react";
+import StoryCoauthorPanel from "../../components/requests/StoryCoauthorPanel";
 
 type UpdateFormValues = z.infer<typeof updateSchema>;
 
@@ -36,6 +38,7 @@ const EditStory = () => {
   const { storyId } = useParams<{ storyId: string}>();
   // Find Story Details
   const [ story, setStory ] = useState<StoryInfo | null>(null);
+  const [ manageCoauthors, setManageCoauthors ] = useState(false);
   const [ chapters, setChapters ] = useState<PageResponse<ChapterInfo> | null>(null);
   useEffect(() => {
     const loadStory = async () => {
@@ -242,6 +245,12 @@ const EditStory = () => {
 
       { story && !modifiedStory ? (
         <div className="w-full min-w-0 p-4 sm:p-8 lg:p-14 xl:px-30 max-w-7xl mx-auto space-y-10 sm:space-y-16">
+          <div className="flex justify-end">
+            <button type="button" onClick={() => setManageCoauthors(true)} className="flex cursor-pointer items-center gap-2 rounded-xl border border-primary/30 bg-surface-container-low px-4 py-3 font-semibold text-on-surface transition hover:bg-primary/10 active:scale-95">
+              <UsersRound size={18} /> Gestionar coautores
+            </button>
+          </div>
+          {manageCoauthors && <StoryCoauthorPanel storyId={story.id} onClose={() => setManageCoauthors(false)} />}
           <section className="relative">
             <nav className="hidden xl:flex fixed top-26 right-8 2xl:right-20 flex-col gap-2 z-10">
               <a href="#info" className="p-4 rounded-xl text-on-surface-variant hover:bg-primary-container hover:text-on-primary hover:shadow-lg hover:shadow-primary-container/10 transition-all" title="Basic Info">

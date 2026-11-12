@@ -67,6 +67,11 @@ export const registerStoryRequest = async (story: RegisterStory): Promise<void> 
     return response.data;
 }
 
+export const generateStorySynopsisRequest = async (idea: string, tags: string[]): Promise<string> => {
+    const response = await storyClient.post<{ description: string }>("api/story/ai/synopsis", { idea, tags });
+    return response.data.description;
+}
+
 export const updateStoryRequest = async (story: UpdateStory, storyId: string): Promise<void> => {
     const response = await storyClient.put(`api/story/update/${storyId}`, story);
     return response.data;

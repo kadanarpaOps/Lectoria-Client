@@ -50,6 +50,10 @@ function StoriesProvider({ children }: Props) {
         return true;
     };
 
+    const generateStorySynopsis = async (idea: string, tags: string[]): Promise<string> => {
+        return storiesService.generateStorySynopsis(idea, tags);
+    };
+
     const updateStory = async (storyData: UpdateStory, storyId: string): Promise<boolean> => {
         const response = await executeTask(() => storiesService.updateStory(storyData, storyId), setLoading, setError, showAlert, true);
         if (!response) return false;
@@ -134,6 +138,7 @@ function StoriesProvider({ children }: Props) {
         genresError,
         loadGenres,
         createStory,
+        generateStorySynopsis,
         updateStory,
         updateStoryCover,
         deleteStoryCover,

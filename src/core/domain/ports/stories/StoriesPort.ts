@@ -11,6 +11,7 @@ export interface StoryPort {
     getStoryById(storyId: string): Promise<StoryInfo>;
     getLastModifiedStory(): Promise<LastModifiedStory>;
     registerStory(story: RegisterStory): Promise<void>
+    generateStorySynopsis(idea: string, tags: string[]): Promise<string>;
     updateStory(story: UpdateStory, storyId: string): Promise<void>;
     toggleStoryHidden(storyId: string): Promise<void>;
     deleteStory(storyId: string): Promise<void>;

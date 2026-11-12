@@ -13,6 +13,7 @@ import { useAlert } from '../../hooks/useAlert';
 import SaveActualEditionModal from '../../components/writing/SaveActualEditionModal';
 import LoadLastEditionModal from '../../components/writing/LoadLastEditionModal';
 import { parseTiptapContent } from "../utils/renderTiptap.util";
+import { acquireChapterLock, releaseChapterLock } from "../../../infrastructure/api/requests/requests.request";
 
 const extensions = [
     TextStyleKit, StarterKit,
@@ -52,7 +53,49 @@ export default function Write() {
 
     // Load or Recover Story
     const [ editingChapter, setEditingChapter ] = useState<EditingChapter | null>(null);
+    const [ lockedChapterId, setLockedChapterId ] = useState<string | null>(null);
     const { updateChapter, error } = useChapters();
+
+    useEffect(() => {
+        const chapterId = editingChapter?.id;
+        if (!chapterId) {
+            return;
+        }
+        let disposed = false;
+        const acquire = async () => {
+            try {
+                await acquireChapterLock(chapterId);
+                if (disposed) {
+                    await releaseChapterLock(chapterId);
+                    return;
+                }
+                setLockedChapterId(chapterId);
+            } catch {
+                if (!disposed) {
+                    setLockedChapterId(null);
+                    showAlert("Este capítulo ya está siendo editado por otra persona.", 5000);
+                    setEditingChapter(null);
+                    localStorage.removeItem(EDITING_CHAPTER_KEY);
+                    navigate("/profile", { replace: true });
+                }
+            }
+        };
+        void acquire();
+        const heartbeat = window.setInterval(() => {
+            void acquireChapterLock(chapterId).catch(() => {
+                if (!disposed) {
+                    setLockedChapterId(null);
+                    showAlert("Se perdió el control de edición de este capítulo.", 5000);
+                    navigate("/profile", { replace: true });
+                }
+            });
+        }, 45_000);
+        return () => {
+            disposed = true;
+            window.clearInterval(heartbeat);
+            void releaseChapterLock(chapterId);
+        };
+    }, [editingChapter?.id, navigate, showAlert]);
 
     // Antes se leía localStorage en cada render: como cada tecla guarda el borrador, el texto
     // cambiaba, el useEffect de abajo se volvía a ejecutar y recreaba los editores (perdían el foco)
@@ -142,6 +185,10 @@ export default function Write() {
     }, [editingChapter?.id]);
 
     const handleChapterSave = async (): Promise<boolean> => {
+        if (!editingChapter || lockedChapterId !== editingChapter.id) {
+            showAlert("Espera a que se confirme el control de edición antes de guardar.", 5000);
+            return false;
+        }
         const title = titleEditor?.getJSON();
         const titleFormatted = JSON.stringify(title);
 

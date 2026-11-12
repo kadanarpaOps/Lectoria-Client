@@ -1,4 +1,4 @@
-import { addToFavoritesRequest, deleteStoryCoverRequest, deleteStoryRequest, getAllGenresRequest, getAuthUserSavedStoriesRequest, getAuthUserStoriesRequest, getLastModifiedStoryRequest, getPublicStoriesByUserRequest, getStoriesRequest, getStoryByIdRequest, pageTagsRequest, registerStoryRequest, removeFromFavoritesRequest, toggleStoryHiddenRequest, updateStoryCoverRequest, updateStoryRequest, updateStoryTags, verifyFromFavoritesRequest } from "../../../infrastructure/api/requests/stories/stories.request";
+import { addToFavoritesRequest, deleteStoryCoverRequest, deleteStoryRequest, generateStorySynopsisRequest, getAllGenresRequest, getAuthUserSavedStoriesRequest, getAuthUserStoriesRequest, getLastModifiedStoryRequest, getPublicStoriesByUserRequest, getStoriesRequest, getStoryByIdRequest, pageTagsRequest, registerStoryRequest, removeFromFavoritesRequest, toggleStoryHiddenRequest, updateStoryCoverRequest, updateStoryRequest, updateStoryTags, verifyFromFavoritesRequest } from "../../../infrastructure/api/requests/stories/stories.request";
 import type { PageResponse } from "../../domain/models/common/PaginationModels";
 import type { BasicInfo, LastModifiedStory, RegisterStory, StoryInfo, UpdateStory, StoryFilters } from "../../domain/models/stories/StoryModel";
 import type { StoryPort } from "../../domain/ports/stories/StoriesPort";
@@ -46,6 +46,10 @@ export class StoryService implements StoryPort {
     async registerStory(story: RegisterStory): Promise<void> {
         const response = await registerStoryRequest(story);
         return response;
+    }
+
+    async generateStorySynopsis(idea: string, tags: string[]): Promise<string> {
+        return generateStorySynopsisRequest(idea, tags);
     }
 
     async updateStory(story: UpdateStory, storyId: string): Promise<void> {

@@ -1,6 +1,7 @@
 import type z from "zod";
-import { Bell, Bolt, Cog, ImageUp, Plus, PlusIcon, X } from "lucide-react"
+import { Bell, Bolt, Cog, ImageUp, LoaderCircle, Plus, PlusIcon, Sparkles, X } from "lucide-react"
 import React, { useEffect, useRef, useState } from "react";
+import { isAxiosError } from "axios";
 import SelectCategoryModal from "../../components/stories/SelectCategoryModal";
 import { registerSchema } from "../../schemas/stories/stories.schema";
 import { useForm, useWatch } from "react-hook-form";
@@ -18,11 +19,14 @@ const CreateStory = () => {
   // Use Navigate
   const navigate = useNavigate();
   // Use Stories
-  const { loading, createStory, pageTags } = useStories();
+  const { loading, createStory, generateStorySynopsis, pageTags } = useStories();
   // Use Auth
   const { authUser } = useAuth();
   // Show Set Genres Modal
   const [ modalMode, setModalMode ] = useState<"genre" | "subgenre" | null>(null);
+  const [ synopsisIdea, setSynopsisIdea ] = useState("");
+  const [ isGeneratingSynopsis, setIsGeneratingSynopsis ] = useState(false);
+  const [ synopsisError, setSynopsisError ] = useState<string | null>(null);
   // Use Form
   const { register, handleSubmit, setValue, control, formState: { isSubmitting, errors }, reset } = useForm({
     resolver: zodResolver(registerSchema),
@@ -99,6 +103,27 @@ const CreateStory = () => {
   const handleRemoveTag = (tagName: string) => {
     setValue("tagNames", currentTags!.filter((t) => t !== tagName));
   }
+
+  const handleGenerateSynopsis = async () => {
+    if (!synopsisIdea.trim() || isGeneratingSynopsis) return;
+    setIsGeneratingSynopsis(true);
+    setSynopsisError(null);
+    try {
+      const description = await generateStorySynopsis(synopsisIdea.trim(), currentTags ?? []);
+      setValue("description", description, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    } catch (error) {
+      const message = isAxiosError<{ message?: string }>(error)
+        ? error.response?.data?.message
+        : null;
+      setSynopsisError(message || "No se pudo generar la sinopsis. Inténtalo nuevamente.");
+    } finally {
+      setIsGeneratingSynopsis(false);
+    }
+  };
 
   // On Submit
   const onSubmit = async (data: CreateFormValues) => {
@@ -238,16 +263,46 @@ const CreateStory = () => {
                 </div>
                 <div className="space-y-3">
                   {/** Description */}
-                  <label className="block text-sm font-semibold tracking-wide text-primary/80 uppercase ml-1">
+                  <label htmlFor="story-description" className="block text-sm font-semibold tracking-wide text-primary/80 uppercase ml-1">
                     Sinopsis
                   </label>
                   <textarea
+                    id="story-description"
                     className="w-full bg-surface-container-highest border-none rounded-xl px-6 py-4 text-on-surface placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary transition-all outline-none focus:outline-none resize-none"
                     placeholder="Cuéntanos de qué trata tu obra..."
                     rows={5}
+                    maxLength={500}
                     {...register("description")}
                   />
                   {errors.description && <p>{errors.description.message}</p>}
+                  <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4 sm:p-5 space-y-3">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Sparkles size={18} />
+                      <span>Asistente de escritura</span>
+                    </div>
+                    <p className="text-sm text-on-surface-variant">
+                      Cuéntale tu idea y la IA propondrá una sinopsis usando también las etiquetas que agregaste.
+                      Puedes editar el resultado antes de crear la historia.
+                    </p>
+                    <textarea
+                      value={synopsisIdea}
+                      onChange={(event) => setSynopsisIdea(event.target.value)}
+                      maxLength={2000}
+                      rows={3}
+                      placeholder="Ej.: Una aprendiz de cartógrafa descubre que los mapas de su ciudad cambian cada noche..."
+                      className="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary transition-all outline-none resize-y"
+                    />
+                    {synopsisError && <p role="alert" className="text-sm text-destructive">{synopsisError}</p>}
+                    <button
+                      type="button"
+                      onClick={handleGenerateSynopsis}
+                      disabled={!synopsisIdea.trim() || isGeneratingSynopsis}
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-primary-container px-5 py-3 font-semibold text-on-primary-container transition-all hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+                    >
+                      {isGeneratingSynopsis ? <LoaderCircle size={18} className="animate-spin" /> : <Sparkles size={18} />}
+                      {isGeneratingSynopsis ? "Redactando..." : "Generar sinopsis"}
+                    </button>
+                  </div>
                 </div>
                 {/** Genres */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

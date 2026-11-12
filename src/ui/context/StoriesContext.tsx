@@ -15,6 +15,7 @@ export interface StoriesContextType {
     // Rest Methods
     pageTags: (offset: number, limit: number, tagName: string) => Promise<PageResponse<BasicInfo>>
     createStory: (story: RegisterStory) => Promise<boolean>;
+    generateStorySynopsis: (idea: string, tags: string[]) => Promise<string>;
     updateStory: (story: UpdateStory, storyId: string) => Promise<boolean>;
     updateStoryCover: (file: File, storyId: string) => Promise<boolean>;
     deleteStoryCover: (storyId: string) => Promise<boolean>;

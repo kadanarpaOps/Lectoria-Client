@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, KeyRound, Search, Sparkles } from "lucide-react";
+import { ArrowRight, KeyRound, Search, ShieldCheck, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router";
 
 type OrbPosition = {
@@ -23,7 +23,7 @@ const POSITION_STORAGE_KEY = "lectoria-verification-orb-position";
 
 export default function VerificationAssistantOrb() {
   const [open, setOpen] = useState(false);
-  const [focusedOption, setFocusedOption] = useState<"registry" | "password" | null>(null);
+  const [focusedOption, setFocusedOption] = useState<"registry" | "password" | "reactivation" | null>(null);
   const [position, setPosition] = useState<OrbPosition | null>(null);
   const navigate = useNavigate();
   const orbRef = useRef<HTMLButtonElement>(null);
@@ -186,6 +186,23 @@ export default function VerificationAssistantOrb() {
             <span className="mt-1 block font-mono text-[10px] text-[#b8d5d2]">Recupera el acceso seguro</span>
           </span>
           <ArrowRight size={15} className="ml-auto shrink-0 text-[#92d8d0] transition-transform group-hover:translate-x-1" />
+        </button>
+        <button
+          type="button"
+          onMouseEnter={() => setFocusedOption("reactivation")}
+          onFocus={() => setFocusedOption("reactivation")}
+          onBlur={() => setFocusedOption(null)}
+          onClick={() => navigate("/recovery-pass?mode=reactivate")}
+          className={`group flex w-52 items-center gap-3 border-2 border-[#d7b7f5]/60 bg-[#17212b]/95 px-4 py-3 text-left shadow-[4px_4px_0_#080d12] transition-all duration-500 hover:border-[#eddaff] hover:bg-[#243541] hover:shadow-[0_0_22px_rgba(215,183,245,0.24)] active:scale-95 ${open ? "translate-x-0" : "translate-x-5"} ${focusedOption === "reactivation" ? "z-10 scale-105" : focusedOption ? "scale-90 opacity-75" : "scale-100"} ${open && "animate-[fade-in_800ms_ease-out_both]"}`}
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-[#d7b7f5]/40 bg-[#d7b7f5]/10 text-[#eddaff] transition-transform duration-300 group-hover:rotate-[8deg] group-hover:scale-110">
+            <ShieldCheck size={18} />
+          </span>
+          <span>
+            <span className="block font-mono text-xs font-bold uppercase tracking-wider text-[#eddaff]">Reactivar cuenta</span>
+            <span className="mt-1 block font-mono text-[10px] text-[#b8d5d2]">Solicita ayuda al equipo</span>
+          </span>
+          <ArrowRight size={15} className="ml-auto shrink-0 text-[#d7b7f5] transition-transform group-hover:translate-x-1" />
         </button>
       </div>
 
