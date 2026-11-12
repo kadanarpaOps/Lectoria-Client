@@ -5,6 +5,7 @@ import type z from "zod";
 import { searchSchema } from "../schemas/stories/stories.schema";
 import { useCallback, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { isAxiosError } from "axios";
 
 type SearchFormValues = z.infer<typeof searchSchema>;
 
@@ -16,6 +17,7 @@ interface UseSearchStoriesResults {
   searchForm: UseFormReturn<SearchFormValues>;
   resultStories: PageResponse<StoryInfo> | null;
   loading: boolean;
+  error: string | null;
   handleSearch: (values: SearchFormValues) => Promise<void>;
   resetSearch: () => void;
 }
@@ -24,6 +26,7 @@ export const useSearchStories = ({ loadStories }: Props): UseSearchStoriesResult
 
   const [ resultStories, setResultStories ] = useState<PageResponse<StoryInfo> | null>(null);
   const [ loading, setLoading ] = useState<boolean>(false);
+  const [ error, setError ] = useState<string | null>(null);
 
   // Use Form
   const searchForm = useForm<SearchFormValues>({
@@ -43,6 +46,7 @@ export const useSearchStories = ({ loadStories }: Props): UseSearchStoriesResult
   // Search
   const handleSearch = useCallback(async (values: SearchFormValues) => {
     setLoading(true);
+    setError(null);
     
     const filters = {
       offset: values.offset,
@@ -55,13 +59,18 @@ export const useSearchStories = ({ loadStories }: Props): UseSearchStoriesResult
       newestFirst: values.newestFirst,
     };
 
-    const response = await loadStories(filters);
-    if (!response.data) {
+    try {
+      const response = await loadStories(filters);
+      setResultStories(response);
+    } catch (requestError) {
+      const message = isAxiosError<{ message?: string }>(requestError)
+        ? requestError.response?.data?.message
+        : null;
       setResultStories(null);
+      setError(message || "No se pudieron cargar las historias. Inténtalo nuevamente.");
+    } finally {
+      setLoading(false);
     }
-    setResultStories(response);
-    
-    setLoading(false);
   }, [loadStories]);
 
   const resetSearch = () => {
@@ -81,6 +90,7 @@ export const useSearchStories = ({ loadStories }: Props): UseSearchStoriesResult
     searchForm,
     resultStories,
     loading,
+    error,
     handleSearch,
     resetSearch,
   };

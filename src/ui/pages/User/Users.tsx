@@ -1,22 +1,59 @@
-import { useCallback, useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Search, UserRound, UsersRound } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Search, UserRound, UsersRound } from "lucide-react";
 import { UserService } from "../../../core/use-cases/UserUseCases";
 import type { UserDirectoryEntry } from "../../../core/domain/models/users/UserDirectoryModel";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
+import { isAxiosError } from "axios";
+import PageNavigator from "../../components/navigation/PageNavigator";
 
 const userService = new UserService();
 const PAGE_SIZE = 10;
+const DIRECTORY_STATE_KEY = "lectoria-community-directory-state";
+
+interface DirectoryState {
+  page: number;
+  username: string;
+  email: string;
+  usernameFilter: string;
+  emailFilter: string;
+  scrollY: number;
+}
+
+function getRestoredDirectoryState(): DirectoryState | null {
+  try {
+    const stored = sessionStorage.getItem(DIRECTORY_STATE_KEY);
+    if (!stored) return null;
+    sessionStorage.removeItem(DIRECTORY_STATE_KEY);
+    const state = JSON.parse(stored) as Partial<DirectoryState>;
+    if (
+      Number.isInteger(state.page) && (state.page ?? -1) >= 0
+      && typeof state.username === "string"
+      && typeof state.email === "string"
+      && typeof state.usernameFilter === "string"
+      && typeof state.emailFilter === "string"
+      && typeof state.scrollY === "number"
+    ) {
+      return state as DirectoryState;
+    }
+  } catch {
+    // Keep the directory usable if storage is blocked or contains invalid data.
+  }
+  return null;
+}
 
 export default function Users() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [restoredState] = useState(getRestoredDirectoryState);
+  const restoredScrollY = useRef<number | null>(restoredState?.scrollY ?? null);
   const [users, setUsers] = useState<UserDirectoryEntry[]>([]);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(restoredState?.page ?? 0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [usernameFilter, setUsernameFilter] = useState("");
-  const [emailFilter, setEmailFilter] = useState("");
+  const [username, setUsername] = useState(restoredState?.username ?? "");
+  const [email, setEmail] = useState(restoredState?.email ?? "");
+  const [usernameFilter, setUsernameFilter] = useState(restoredState?.usernameFilter ?? "");
+  const [emailFilter, setEmailFilter] = useState(restoredState?.emailFilter ?? "");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,8 +65,11 @@ export default function Users() {
       setUsers(result.data);
       setTotalPages(result.metaData.totalPages);
       setTotalItems(result.metaData.totalItems);
-    } catch {
-      setError("No se pudo cargar el directorio de usuarios. Inténtalo nuevamente.");
+    } catch (requestError) {
+      const message = isAxiosError<{ message?: string }>(requestError)
+        ? requestError.response?.data?.message
+        : null;
+      setError(message || "No se pudo cargar el directorio de usuarios. Inténtalo nuevamente.");
     } finally {
       setLoading(false);
     }
@@ -39,6 +79,15 @@ export default function Users() {
     const timer = window.setTimeout(() => { void loadUsers(); }, 0);
     return () => window.clearTimeout(timer);
   }, [loadUsers]);
+
+  useEffect(() => {
+    if (loading || restoredScrollY.current === null) return;
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: restoredScrollY.current ?? 0, behavior: "auto" });
+      restoredScrollY.current = null;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [loading, users]);
 
   const applyFilters = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -53,6 +102,22 @@ export default function Users() {
     setUsernameFilter("");
     setEmailFilter("");
     setPage(0);
+  };
+
+  const openUserProfile = (userId: string) => {
+    try {
+      sessionStorage.setItem(DIRECTORY_STATE_KEY, JSON.stringify({
+        page,
+        username,
+        email,
+        usernameFilter,
+        emailFilter,
+        scrollY: window.scrollY,
+      } satisfies DirectoryState));
+    } catch {
+      // The profile remains accessible even when browser storage is unavailable.
+    }
+    navigate(`/users/${userId}`, { state: { from: `${location.pathname}${location.search}` } });
   };
 
   return (
@@ -78,7 +143,7 @@ export default function Users() {
       <section className="space-y-3">
         <div className="flex items-center justify-between text-sm text-several-light">
           <span>{totalItems} usuarios</span>
-          <span>Página {page + 1} de {totalPages}</span>
+          <span>Página {page + 1} de {Math.max(totalPages, 1)}</span>
         </div>
         {error && <p role="alert" className="rounded-xl bg-red-500/10 p-4 text-red-300">{error}</p>}
         {loading ? (
@@ -89,7 +154,7 @@ export default function Users() {
           <button
             type="button"
             key={user.userId}
-            onClick={() => navigate(`/users/${user.userId}`)}
+            onClick={() => openUserProfile(user.userId)}
             className="flex w-full cursor-pointer items-center gap-3 rounded-3xl border border-toolbar-bg/10 bg-background-global p-4 text-left transition-all hover:border-high-enfasis/30 hover:bg-high-enfasis/5 active:scale-[0.99] sm:gap-4 sm:p-5"
             aria-label={`Ver perfil de ${user.username}`}
           >
@@ -106,12 +171,7 @@ export default function Users() {
         ))}
       </section>
 
-      {totalPages > 1 && (
-        <div className="mt-6 flex justify-center gap-3">
-          <button type="button" disabled={page === 0} onClick={() => setPage((current) => current - 1)} className="rounded-xl border border-toolbar-bg/10 p-3 text-global disabled:opacity-40" aria-label="Página anterior"><ChevronLeft /></button>
-          <button type="button" disabled={page >= totalPages - 1} onClick={() => setPage((current) => current + 1)} className="rounded-xl border border-toolbar-bg/10 p-3 text-global disabled:opacity-40" aria-label="Página siguiente"><ChevronRight /></button>
-        </div>
-      )}
+      <PageNavigator page={page} totalPages={totalPages} onPageChange={setPage} />
     </main>
   );
 }

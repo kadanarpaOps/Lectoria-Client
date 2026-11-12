@@ -12,6 +12,9 @@ import { countTotalWords, parseTiptapContent, renderWithoutFormat } from "../uti
 import { getLastModifiedTime } from "../utils/time.util";
 import CommentsSection from "../../components/stories/CommentsSection";
 import { createCoauthorRequest } from "../../../infrastructure/api/requests/requests.request";
+import { UserService } from "../../../core/use-cases/UserUseCases";
+
+const userService = new UserService();
 
 const StoryDetails = () => {
 
@@ -32,7 +35,10 @@ const StoryDetails = () => {
   const [ totalItemsChapters, setTotalChaptersItems ] = useState<number | null>(null)
   const [ coauthorRequestSent, setCoauthorRequestSent ] = useState(false);
   const [ coauthorRequestError, setCoauthorRequestError ] = useState<string | null>(null);
+  const [ authorProfile, setAuthorProfile ] = useState<{ userId: string; username: string } | null>(null);
   const isOwnStory = Boolean(authUser && story?.userId === authUser.userId);
+  const storyAuthorId = story?.userId;
+  const authorUsername = authorProfile?.userId === storyAuthorId ? authorProfile.username : null;
 
   useEffect(() => {
     const loadStory = async () => {
@@ -58,6 +64,25 @@ const StoryDetails = () => {
     };
     loadStory();
   }, [storyId, loadStoryById, navigate, authUser, getChaptersByStory, existsFromFavorites]);
+
+  useEffect(() => {
+    if (!storyAuthorId || isOwnStory) {
+      return;
+    }
+
+    let active = true;
+    void userService.getPublicUserProfile(storyAuthorId)
+      .then((profile) => {
+        if (active) setAuthorProfile({ userId: storyAuthorId, username: profile.username });
+      })
+      .catch(() => {
+        if (active) setAuthorProfile({ userId: storyAuthorId, username: "Autor" });
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [storyAuthorId, isOwnStory]);
 
   // Favorite Details
   const handleAddFavorite = async (storyId: string) => {
@@ -123,7 +148,7 @@ const StoryDetails = () => {
                       <Pencil size={20} fill="currentColor" />
                     </span>
                     <span className="text-md font-medium">
-                      {isOwnStory ? "Tu historia" : "Autor"}
+                      {isOwnStory ? "Tu historia" : authorUsername ?? "Autor"}
                     </span>
                   </div>
                   <div className="w-1 h-1 bg-outline-variant/30 rounded-full"></div>

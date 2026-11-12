@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, BookOpen, CalendarDays, UserRound } from "lucide-react";
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { UserService } from "../../../core/use-cases/UserUseCases";
 import type { PublicUserProfile } from "../../../core/domain/models/users/UserDirectoryModel";
 import type { PageResponse } from "../../../core/domain/models/common/PaginationModels";
@@ -14,12 +14,33 @@ const userService = new UserService();
 const storyService = new StoryService();
 const PAGE_SIZE = 12;
 
+interface ProfileStoriesState {
+  page: number;
+  scrollY: number;
+}
+
 export default function PublicUserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const stateKey = `lectoria-profile-stories:${userId ?? ""}`;
+  const [restoredState] = useState<ProfileStoriesState | null>(() => {
+    try {
+      const stored = sessionStorage.getItem(stateKey);
+      if (!stored) return null;
+      sessionStorage.removeItem(stateKey);
+      const state = JSON.parse(stored) as Partial<ProfileStoriesState>;
+      return Number.isInteger(state.page) && (state.page ?? -1) >= 0 && typeof state.scrollY === "number"
+        ? state as ProfileStoriesState
+        : null;
+    } catch {
+      return null;
+    }
+  });
+  const restoredScrollY = useRef<number | null>(restoredState?.scrollY ?? null);
   const [profile, setProfile] = useState<PublicUserProfile | null>(null);
   const [stories, setStories] = useState<PageResponse<StoryInfo> | null>(null);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(restoredState?.page ?? 0);
   const [loading, setLoading] = useState(Boolean(userId));
   const [error, setError] = useState<string | null>(null);
 
@@ -57,6 +78,27 @@ export default function PublicUserProfilePage() {
     };
   }, [page, userId]);
 
+  useEffect(() => {
+    if (loading || !stories || restoredScrollY.current === null) return;
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: restoredScrollY.current ?? 0, behavior: "auto" });
+      restoredScrollY.current = null;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [loading, stories]);
+
+  const openStory = (storyId: string) => {
+    try {
+      sessionStorage.setItem(stateKey, JSON.stringify({
+        page,
+        scrollY: window.scrollY,
+      } satisfies ProfileStoriesState));
+    } catch {
+      // The selected story remains accessible if browser storage is unavailable.
+    }
+    navigate(`/explore/story/${storyId}`);
+  };
+
   const displayError = error ?? (!userId ? "No se encontró el usuario solicitado." : null);
   const changePage = (nextPage: number) => {
     setError(null);
@@ -68,7 +110,10 @@ export default function PublicUserProfilePage() {
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
       <button
         type="button"
-        onClick={() => navigate("/users")}
+        onClick={() => {
+          const from = (location.state as { from?: unknown } | null)?.from;
+          navigate(typeof from === "string" && from.startsWith("/users") ? from : "/users");
+        }}
         className="mb-6 inline-flex cursor-pointer items-center gap-2 rounded-full border border-toolbar-bg/15 px-4 py-2 text-sm font-semibold text-global transition-colors hover:bg-toolbar-bg/10"
       >
         <ArrowLeft size={17} />
@@ -120,7 +165,7 @@ export default function PublicUserProfilePage() {
                   <button
                     key={story.id}
                     type="button"
-                    onClick={() => navigate(`/explore/story/${story.id}`)}
+                    onClick={() => openStory(story.id)}
                     className="group min-w-0 cursor-pointer overflow-hidden rounded-2xl border border-toolbar-bg/10 bg-background-global text-left transition-transform hover:-translate-y-1 active:scale-[0.98]"
                   >
                     <div className="aspect-3/4 overflow-hidden bg-surface-container-low">

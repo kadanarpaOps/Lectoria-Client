@@ -1,4 +1,4 @@
-import { AxiosError } from "axios";
+import { isAxiosError } from "axios";
 import { typeAlert } from "../AlertTypes";
 
 const executeTask = async <T,>(
@@ -13,13 +13,12 @@ const executeTask = async <T,>(
     try {
         return await task();
     } catch (error) {
-        let errorMessage = "Ocurrió un error en el servidor";
-        if (error instanceof AxiosError) {
-            errorMessage = error.response?.data?.message || errorMessage;
-            setServerError(errorMessage);
-            if (needAlert && showAlert) {
-                showAlert(errorMessage, 5000, typeAlert.ERROR);
-            }
+        const errorMessage = isAxiosError<{ message?: string }>(error)
+            ? error.response?.data?.message || "No se pudo completar la solicitud. Inténtalo nuevamente."
+            : "No se pudo completar la solicitud. Comprueba tu conexión e inténtalo nuevamente.";
+        setServerError(errorMessage);
+        if (needAlert && showAlert) {
+            showAlert(errorMessage, 5000, typeAlert.ERROR);
         }
         return null;
     } finally {

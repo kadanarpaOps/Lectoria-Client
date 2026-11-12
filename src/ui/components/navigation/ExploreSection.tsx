@@ -1,6 +1,6 @@
-import { useNavigate, useSearchParams } from "react-router";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { useSearchStories } from "../../hooks/useSearchStories";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useWatch } from "react-hook-form";
 import type { StatusNames, StoryFilters, StoryInfo } from "../../../core/domain/models/stories/StoryModel";
 import type { searchSchema } from "../../schemas/stories/stories.schema";
@@ -17,6 +17,31 @@ import PageNavigator from "./PageNavigator";
 
 type SearchFormValues = z.infer<typeof searchSchema>;
 
+interface ExploreState {
+  page: number;
+  filters: SearchFormValues;
+  scrollY: number;
+}
+
+function readExploreState(key: string): ExploreState | null {
+  try {
+    const stored = sessionStorage.getItem(key);
+    if (!stored) return null;
+    sessionStorage.removeItem(key);
+    const state = JSON.parse(stored) as Partial<ExploreState>;
+    if (
+      Number.isInteger(state.page) && (state.page ?? -1) >= 0
+      && typeof state.scrollY === "number"
+      && state.filters && typeof state.filters === "object"
+    ) {
+      return state as ExploreState;
+    }
+  } catch {
+    // Ignore unavailable browser storage and use the default search state.
+  }
+  return null;
+}
+
 interface Props {
   loadStories: (filters: StoryFilters) => Promise<PageResponse<StoryInfo>>;
   loading: boolean;
@@ -27,11 +52,15 @@ const ExploreSection = ({ loadStories, loading, routeAction }: Props) => {
 
     // Use Navigate
     const navigate = useNavigate();
+    const location = useLocation();
     // Use Search Params
     const [ searchParams ] = useSearchParams();
+    const storageKey = `lectoria-explore-state:${location.pathname}:${routeAction}`;
+    const [ restoredState ] = useState(() => readExploreState(storageKey));
+    const restoredScrollY = useRef<number | null>(restoredState?.scrollY ?? null);
     // Use Search Stories
-    const { searchForm, resultStories, handleSearch, resetSearch } = useSearchStories({ loadStories });
-    const [ page, setPage ] = useState<number>(0);
+    const { searchForm, resultStories, handleSearch, resetSearch, error: searchError } = useSearchStories({ loadStories });
+    const [ page, setPage ] = useState<number>(restoredState?.page ?? 0);
     // Use Form
     const { handleSubmit, reset, control, setValue } = searchForm;
 
@@ -54,22 +83,10 @@ const ExploreSection = ({ loadStories, loading, routeAction }: Props) => {
         setIsSelectingStatus(false);
     };
 
-    // Use Effect for default search
+    // Restore filters before the initial page request after returning from a story.
     useEffect(() => {
-        const initialSearch = async () => {
-            await handleSearch({
-                offset: 0,
-                limit: 12,
-                title: null,
-                genreName: null,
-                secondaryGenreName: null,
-                status: null,
-                tagNames: null,
-                newestFirst: true
-            });
-        };
-        initialSearch();
-    }, [handleSearch]);
+        if (restoredState) reset(restoredState.filters);
+    }, [reset, restoredState]);
 
     // Handle Submit
     const onSubmit = useCallback(async (data: SearchFormValues) => {
@@ -85,6 +102,28 @@ const ExploreSection = ({ loadStories, loading, routeAction }: Props) => {
         };
         loadPerChange();
     }, [handleSubmit, page, onSubmit])
+
+    useEffect(() => {
+        if (loading || !resultStories || restoredScrollY.current === null) return;
+        const frame = window.requestAnimationFrame(() => {
+            window.scrollTo({ top: restoredScrollY.current ?? 0, behavior: "auto" });
+            restoredScrollY.current = null;
+        });
+        return () => window.cancelAnimationFrame(frame);
+    }, [loading, resultStories]);
+
+    const openStory = (storyId: string) => {
+        try {
+            sessionStorage.setItem(storageKey, JSON.stringify({
+                page,
+                filters: searchForm.getValues(),
+                scrollY: window.scrollY,
+            } satisfies ExploreState));
+        } catch {
+            // Navigation to the selected story should work without browser storage.
+        }
+        navigate(`${routeAction}${storyId}`);
+    };
 
     // Mobile filter sheet
     const [ filtersOpen, setFiltersOpen ] = useState<boolean>(false);
@@ -344,13 +383,18 @@ const ExploreSection = ({ loadStories, loading, routeAction }: Props) => {
                 )}
             </div>
             <div>
+                {searchError && (
+                    <p role="alert" className="mb-5 rounded-xl bg-red-500/10 p-4 text-red-300">
+                        {searchError}
+                    </p>
+                )}
                 { resultStories && !loading && resultStories.data.length > 0 ? (
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
                         {resultStories.data.map(story => (
                             <div
                                 className="col-span-1 min-w-0"
                                 key={story.id}
-                                onClick={() => navigate(`${routeAction}${story.id}`)}
+                                onClick={() => openStory(story.id)}
                             >
                                 <BookCard
                                     author=""

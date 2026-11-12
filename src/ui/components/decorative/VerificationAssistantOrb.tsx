@@ -25,6 +25,7 @@ export default function VerificationAssistantOrb() {
   const [open, setOpen] = useState(false);
   const [focusedOption, setFocusedOption] = useState<"registry" | "password" | "reactivation" | null>(null);
   const [position, setPosition] = useState<OrbPosition | null>(null);
+  const [orbHovered, setOrbHovered] = useState(false);
   const navigate = useNavigate();
   const orbRef = useRef<HTMLButtonElement>(null);
   const dragRef = useRef<DragState | null>(null);
@@ -120,34 +121,23 @@ export default function VerificationAssistantOrb() {
   const optionPosition = position?.side === "left"
     ? "left-full ml-5 items-start"
     : "right-full mr-5 items-end";
-  const bubblePosition = position?.side === "left"
-    ? "left-0 md:left-full md:ml-5 md:right-auto"
-    : "right-0 md:right-full md:mr-5 md:left-auto";
+  const tooltipPosition = position?.side === "left"
+    ? "left-0 md:left-full md:ml-4 md:right-auto"
+    : "right-0 md:right-full md:mr-4 md:left-auto";
 
   return (
     <div
       className={`fixed z-[100] ${position ? "" : "right-4 top-1/2 -translate-y-1/2 max-md:bottom-7 max-md:top-auto max-md:translate-y-0"}`}
       style={position ? { left: position.left, top: position.top } : undefined}
     >
-      <div className={`pointer-events-none absolute bottom-full mb-4 w-56 sm:w-64 ${bubblePosition}`}>
-        <div className="relative border-2 border-[#f1d98c] bg-[#17212b] px-4 py-3 text-center shadow-[4px_4px_0_#080d12] [image-rendering:pixelated]">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-[#ffe9a8] sm:text-xs">
-            {open ? "¿Qué necesitas hoy?" : "¡Este es tu asistente!"}
-          </p>
-          <p className="mt-1 font-mono text-[10px] leading-relaxed text-[#b8d5d2]">
-            Te acompaño a continuar tu camino en Lectoria.
-          </p>
-          <svg
-            aria-hidden="true"
-            className={`absolute -bottom-7 h-8 w-12 animate-bounce text-[#f1d98c] ${position?.side === "left" ? "left-7 md:left-auto md:right-[-1.4rem]" : "right-7 md:right-auto md:left-[-1.4rem]"}`}
-            viewBox="0 0 48 32"
-            fill="none"
-          >
-            <path d="M4 3C10 22 22 26 40 25" stroke="currentColor" strokeWidth="3" strokeDasharray="4 4" />
-            <path d="m33 18 8 7-9 5" stroke="currentColor" strokeWidth="3" strokeLinecap="square" />
-          </svg>
+      {orbHovered && !open && (
+        <div
+          role="tooltip"
+          className={`pointer-events-none absolute bottom-full z-10 mb-3 w-max max-w-56 border border-[#f1d98c]/80 bg-[#17212b] px-3 py-2 font-mono text-[10px] leading-relaxed text-[#ffe9a8] shadow-[3px_3px_0_#080d12] animate-[fade-in_180ms_ease-out_both] sm:text-xs ${tooltipPosition}`}
+        >
+          Asistente para recuperar tu cuenta y continuar tu registro.
         </div>
-      </div>
+      )}
 
       <div
         onMouseLeave={() => setFocusedOption(null)}
@@ -217,6 +207,8 @@ export default function VerificationAssistantOrb() {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
+        onMouseEnter={() => setOrbHovered(true)}
+        onMouseLeave={() => setOrbHovered(false)}
         className="group relative flex h-16 w-16 touch-none cursor-grab items-center justify-center rounded-full border border-[#e6d79d]/80 bg-[radial-gradient(circle_at_30%_25%,#fff5bf_0%,#d1b95c_22%,#806b36_55%,#242437_78%)] shadow-[0_0_24px_rgba(200,185,122,0.5)] transition-transform duration-300 hover:scale-110 active:cursor-grabbing active:scale-95 focus:outline-none focus:ring-2 focus:ring-high-enfasis"
       >
         <span className="absolute inset-1 rounded-full border border-white/40 animate-[spin_8s_linear_infinite]" />
