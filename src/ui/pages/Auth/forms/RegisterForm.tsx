@@ -32,7 +32,7 @@ const RegisterForm = () => {
 
   return (
     <>
-      <div className="w-full max-w-md flex flex-col">
+      <div className="mx-auto w-full max-w-lg flex flex-col">
         <div className="mt-1 mb-10">
           <h2 className="text-3xl font-semibold text-global tracking-tight">
             Bienvenido a Lectoria
@@ -86,7 +86,7 @@ const RegisterForm = () => {
             </div>
           </div>
           <button
-            className={`w-full duration-300 ease-in-out transition-all mt-2 font-bold py-4 rounded-full ${!loading ? "bg-high-enfasis hover:bg-high-enfasis/90 text-on-primary-fixed font-semibold py-4 rounded-full transition-all duration-300 shadow-lg shadow-high-enfasis/20 hover:scale-[0.98] cursor-pointer" : "cursor-default"}`}
+            className={`w-full duration-300 ease-in-out transition-all mt-2 font-bold py-4 rounded-full ${!loading ? "bg-high-enfasis hover:bg-high-enfasis/90 text-on-primary font-semibold py-4 rounded-full transition-all duration-300 shadow-lg shadow-high-enfasis/20 hover:scale-[0.98] cursor-pointer" : "cursor-default"}`}
             type="submit"
             disabled={loading}
           >

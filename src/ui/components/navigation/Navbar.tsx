@@ -5,6 +5,8 @@ import { useStories } from "../../hooks/useStories"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { StoryInfo } from "../../../core/domain/models/stories/StoryModel"
 import { getAppNotifications, getUnreadNotificationCount, notificationReadStateChangedEvent, type AppNotification } from "../../../infrastructure/api/requests/notifications.request"
+import { useTheme } from "../../hooks/useTheme"
+import ThemeToggleButton from "../theme/ThemeToggleButton"
 
 type NavbarProps = {
     isSidebarOpen: boolean | null,
@@ -13,6 +15,8 @@ type NavbarProps = {
 }
 
 const Navbar = ({ isSidebarOpen, isMobile, toggleSidebar }: NavbarProps) => {
+
+  const { theme, toggleTheme } = useTheme();
 
   // Use Location
   const location = useLocation();
@@ -147,6 +151,11 @@ const Navbar = ({ isSidebarOpen, isMobile, toggleSidebar }: NavbarProps) => {
                 </div>
             </div>
             <div className="flex items-center justify-end gap-2">
+                <ThemeToggleButton
+                    theme={theme}
+                    onToggle={toggleTheme}
+                    className="group flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-global transition hover:bg-global/10 hover:text-high-enfasis active:scale-90"
+                />
                 {authUser && (
                     <>
                         <div className="relative">

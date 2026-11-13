@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 520" fill="none">
+  <defs>
+    <linearGradient id="leftPage" x1="112" y1="173" x2="312" y2="397" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF8E3"/>
+      <stop offset="1" stop-color="#C8C093"/>
+    </linearGradient>
+    <linearGradient id="rightPage" x1="312" y1="173" x2="530" y2="397" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7EBC8"/>
+      <stop offset="1" stop-color="#DCD7BA"/>
+    </linearGradient>
+    <linearGradient id="cover" x1="118" y1="344" x2="512" y2="410" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2B3328"/>
+      <stop offset="1" stop-color="#76946A"/>
+    </linearGradient>
+    <filter id="shadow" x="48" y="106" width="550" height="375" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="15"/>
+    </filter>
+  </defs>
+  <circle cx="330" cy="266" r="205" fill="#7FB4CA" opacity=".16"/>
+  <circle cx="330" cy="266" r="165" stroke="#957FB8" stroke-opacity=".32" stroke-width="2" stroke-dasharray="4 12"/>
+  <circle cx="330" cy="266" r="126" fill="#E6C384" opacity=".2"/>
+  <ellipse cx="323" cy="408" rx="192" ry="28" fill="#252535" opacity=".17" filter="url(#shadow)"/>
+  <path d="M114 171c73-39 141-30 206 15v217c-66-43-133-50-206-14V171Z" fill="url(#cover)" stroke="#252535" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M526 171c-73-39-141-30-206 15v217c66-43 133-50 206-14V171Z" fill="#2B3328" stroke="#252535" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M126 174c67-31 125-24 184 14v196c-61-35-120-43-184-14V174Z" fill="url(#leftPage)"/>
+  <path d="M514 174c-67-31-125-24-184 14v196c61-35 120-43 184-14V174Z" fill="url(#rightPage)"/>
+  <path d="M150 213c48-16 95-9 136 12M150 239c48-16 95-9 136 12M150 265c48-16 95-9 136 12M150 291c48-16 95-9 136 12" stroke="#938056" stroke-opacity=".56" stroke-width="5" stroke-linecap="round"/>
+  <path d="M492 213c-48-16-95-9-136 12M492 239c-48-16-95-9-136 12M492 265c-48-16-95-9-136 12M492 291c-48-16-95-9-136 12" stroke="#938056" stroke-opacity=".56" stroke-width="5" stroke-linecap="round"/>
+  <path d="M320 191v212" stroke="#252535" stroke-opacity=".55" stroke-width="8"/>
+  <path d="m435 89 29-34 34 29-29 34z" fill="#D27E99" opacity=".8"/>
+  <path d="m173 107 20-26 27 21-20 26z" fill="#957FB8" opacity=".7"/>
+  <circle cx="532" cy="150" r="11" fill="#FF5D62" opacity=".78"/>
+  <path d="m109 293 7 15 16 2-12 10 3 16-14-8-14 8 3-16-12-10 16-2 7-15Z" fill="#DCA561"/>
+  <path d="m542 310 5 10 11 2-8 7 2 11-10-5-9 5 2-11-8-7 11-2 4-10Z" fill="#76946A"/>
+</svg>

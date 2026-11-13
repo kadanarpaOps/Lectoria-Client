@@ -86,7 +86,7 @@ const LoginForm = () => {
           </div>
         </div>
         <button
-          className={`w-full hover:scale-[0.98] duration-300 ease-in-out transition-all mt-2 font-bold py-4 rounded-full ${!loading ? "cursor-pointer bg-primary-container text-on-primary-fixed hover:shadow-lg hover:shadow-high-enfasis/20}" : "cursor-default"}`}
+          className={`w-full hover:scale-[0.98] duration-300 ease-in-out transition-all mt-2 font-bold py-4 rounded-full ${!loading ? "cursor-pointer bg-high-enfasis text-on-primary hover:bg-high-enfasis/90 hover:shadow-lg hover:shadow-high-enfasis/20" : "cursor-default"}`}
           type="submit"
           disabled={loading}
         >
