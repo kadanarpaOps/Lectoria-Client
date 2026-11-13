@@ -22,12 +22,12 @@ function ChaptersProvider({ children }: Props) {
   
   // Business Methods
   const getChaptersByStory = useCallback(async (filters: ChaptersFilters, storyId: string) => {
-    const response = await executeTask(() => chapterService.getChaptersByStory(filters, storyId), setLoading, setError) as PageResponse<ChapterInfo>;
+    const response = await executeTask(() => chapterService.getChaptersByStory(filters, storyId), setLoading, setError) as PageResponse<ChapterInfo> | null;
     return response;
   }, []);
 
   const getOwnedChaptersByStory = useCallback(async (filters: ChaptersFilters, storyId: string) => {
-    const response = await executeTask(() => chapterService.getOwnedChaptersByStory(filters, storyId), setLoading, setError) as PageResponse<ChapterInfo>;
+    const response = await executeTask(() => chapterService.getOwnedChaptersByStory(filters, storyId), setLoading, setError) as PageResponse<ChapterInfo> | null;
     return response;
   }, []);
 

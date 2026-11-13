@@ -12,6 +12,10 @@ export function menuBarStateSelector(ctx: EditorStateSnapshot<Editor>) {
         canItalic: editor.can().toggleItalic(),
         isUnderline: editor.isActive('underline'),
         canUnderline: editor.can().toggleUnderline(),
+        isHeading1: editor.isActive('heading', { level: 1 }),
+        isHeading2: editor.isActive('heading', { level: 2 }),
+        isHeading3: editor.isActive('heading', { level: 3 }),
+        fontFamily: editor.getAttributes('textStyle').fontFamily as string | undefined,
         //Text Align States
         isLeft: editor.isActive({ textAlign: 'left' }),
         canLeft: editor.can().setTextAlign('left'),

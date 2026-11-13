@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Check, MailOpen } from "lucide-react";
 import { useNavigate } from "react-router";
-import { getAppNotifications, setAppNotificationReadState, type AppNotification } from "../../../infrastructure/api/requests/notifications.request";
+import { getAppNotifications, notificationReadStateChangedEvent, setAppNotificationReadState, type AppNotification } from "../../../infrastructure/api/requests/notifications.request";
 import { useAuth } from "../../hooks/useAuth";
 
 export default function Notifications() {
@@ -40,6 +40,7 @@ export default function Notifications() {
       setItems((current) => current.map((item) => item.notificationId === notification.notificationId
         ? { ...item, shown: !notification.shown, shownAt: !notification.shown ? new Date().toISOString() : null }
         : item));
+      window.dispatchEvent(new Event(notificationReadStateChangedEvent));
     } catch {
       setError("No fue posible actualizar el estado de la notificación.");
     }

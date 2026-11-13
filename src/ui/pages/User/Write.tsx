@@ -255,7 +255,7 @@ export default function Write() {
             
 
             {/** Barra de Herramientas */}
-            <Toolbar editor={activeEditor === 'title' ? titleEditor : editor} onSave={handleChapterSave} />
+            <Toolbar editor={activeEditor === 'title' ? titleEditor : editor} onSave={handleChapterSave} formattingEnabled={activeEditor === 'content'} />
             <div className="w-full max-w-3xl grow">
                 <div className="relative focus:outline-none">
                     <EditorContent editor={titleEditor} className='mb-10' />

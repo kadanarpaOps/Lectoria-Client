@@ -1,5 +1,7 @@
 import httpClient from "../config/axios.instance";
 
+export const notificationReadStateChangedEvent = "lectoria:notification-read-state-changed";
+
 export type AppNotification = {
   notificationId: string;
   notificationContent: string;

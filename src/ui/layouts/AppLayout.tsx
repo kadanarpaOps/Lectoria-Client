@@ -18,6 +18,7 @@ import PublicUserProfilePage from "../pages/User/PublicUserProfilePage";
 import Write from "../pages/User/Write";
 import Notifications from "../pages/User/Notifications";
 import RequestsInbox from "../pages/User/RequestsInbox";
+import ReadingHistory from "../pages/User/ReadingHistory";
 import AdminRequests from "../pages/Admin/AdminRequests";
 import RecoveryPassword from "../pages/Auth/RecoveryPassword";
 import { useAuth } from "../hooks/useAuth";
@@ -55,6 +56,7 @@ export default function AppLayout() {
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+          <Route path="/reading-history" element={<ProtectedRoute><ReadingHistory /></ProtectedRoute>} />
           <Route path="/requests" element={<ProtectedRoute><RequestsInbox /></ProtectedRoute>} />
           <Route path="/write" element={<ProtectedRoute><Write /></ProtectedRoute>} />
           <Route path="/story/create" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />

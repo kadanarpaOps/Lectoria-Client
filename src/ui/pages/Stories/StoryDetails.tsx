@@ -1,17 +1,19 @@
 import { useNavigate, useParams } from "react-router"
 import { useStories } from "../../hooks/useStories";
 import { useAuth } from "../../hooks/useAuth";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { StoryInfo } from "../../../core/domain/models/stories/StoryModel";
 import { getRandomCover } from "../utils/covers.util";
-import { Bookmark, BookOpen, Clock, Info, List, MessageSquareText, Pencil, UserRoundPlus } from "lucide-react";
+import { Bookmark, BookOpen, ChevronLeft, ChevronRight, Clock, Info, List, MessageSquareText, Pencil, UserRoundPlus } from "lucide-react";
 import { useChapters } from "../../hooks/useChapters";
 import type { PageResponse } from "../../../core/domain/models/common/PaginationModels";
 import type { ChapterInfo } from "../../../core/domain/models/chapters/ChapterModel";
 import { countTotalWords, parseTiptapContent, renderWithoutFormat } from "../utils/renderTiptap.util";
 import { getLastModifiedTime } from "../utils/time.util";
 import CommentsSection from "../../components/stories/CommentsSection";
-import { createCoauthorRequest } from "../../../infrastructure/api/requests/requests.request";
+import { createCoauthorRequest, getCoauthoredStories } from "../../../infrastructure/api/requests/requests.request";
+
+const CHAPTERS_PER_PAGE = 5;
 
 const StoryDetails = () => {
 
@@ -30,34 +32,89 @@ const StoryDetails = () => {
   const [ favorite, setFavorite ] = useState<boolean>(false);
   const [ chapters, setChapters ] = useState<PageResponse<ChapterInfo> | null>(null);
   const [ totalItemsChapters, setTotalChaptersItems ] = useState<number | null>(null)
+  const [ chapterPage, setChapterPage ] = useState(0);
+  const [ chapterReloadKey, setChapterReloadKey ] = useState(0);
+  const [ chaptersLoading, setChaptersLoading ] = useState(false);
+  const [ chaptersError, setChaptersError ] = useState<string | null>(null);
   const [ coauthorRequestSent, setCoauthorRequestSent ] = useState(false);
   const [ coauthorRequestError, setCoauthorRequestError ] = useState<string | null>(null);
+  const [ isCoauthor, setIsCoauthor ] = useState(false);
+  const [ coauthorStatusLoaded, setCoauthorStatusLoaded ] = useState(false);
+  const currentStoryIdRef = useRef<string | null>(null);
   const isOwnStory = Boolean(authUser && story?.userId === authUser.userId);
 
   useEffect(() => {
+    let active = true;
     const loadStory = async () => {
       if (storyId) {
         const responseStory = await loadStoryById(storyId);
+        if (!active) return;
         if (responseStory === null) {
           navigate("*");
           return;
         }
         setStory(responseStory);
+        if (currentStoryIdRef.current !== responseStory.id) {
+          currentStoryIdRef.current = responseStory.id;
+          setChapterPage(0);
+          setTotalChaptersItems(null);
+        }
         if (authUser && responseStory.userId !== authUser.userId) {
-          const responseFavorite = await existsFromFavorites(responseStory.id);
-          setFavorite(responseFavorite);
+          setCoauthorStatusLoaded(false);
+          void getCoauthoredStories().then((coauthoredStories) => {
+            if (!active) return;
+            setIsCoauthor(coauthoredStories.some((coauthoredStory) => coauthoredStory.id === responseStory.id));
+            setCoauthorStatusLoaded(true);
+          }).catch(() => {
+            if (active) setIsCoauthor(true);
+          });
+        } else {
+          setIsCoauthor(false);
+          setCoauthorStatusLoaded(true);
+        }
+        if (authUser && responseStory.userId !== authUser.userId) {
+          void existsFromFavorites(responseStory.id).then((responseFavorite) => {
+            if (active) setFavorite(responseFavorite);
+          }).catch(() => {
+            if (active) setFavorite(false);
+          });
         } else {
           setFavorite(false);
         }
-
-        const responseChapters = await getChaptersByStory({offset: 1, limit: 5, newestFirst: true}, responseStory.id);
-        const totalChapters = responseChapters.meta.totalItems;
-        setTotalChaptersItems(totalChapters);
-        setChapters(responseChapters);
       }
     };
-    loadStory();
-  }, [storyId, loadStoryById, navigate, authUser, getChaptersByStory, existsFromFavorites]);
+    void loadStory();
+    return () => { active = false; };
+  }, [storyId, loadStoryById, navigate, authUser, existsFromFavorites]);
+
+  useEffect(() => {
+    let active = true;
+    if (!storyId) return;
+    void Promise.resolve().then(() => {
+      if (!active) return null;
+      setChaptersLoading(true);
+      setChaptersError(null);
+      setChapters(null);
+      return getChaptersByStory({
+        offset: chapterPage * CHAPTERS_PER_PAGE,
+        limit: CHAPTERS_PER_PAGE,
+        newestFirst: false,
+      }, storyId);
+    }).then((responseChapters) => {
+      if (!active) return;
+      if (!responseChapters) {
+        setChaptersError("No se pudieron cargar los capítulos públicos.");
+        return;
+      }
+      setTotalChaptersItems(responseChapters.meta.totalItems);
+      setChapters(responseChapters);
+    }).catch(() => {
+      if (active) setChaptersError("No se pudieron cargar los capítulos públicos.");
+    }).finally(() => {
+      if (active) setChaptersLoading(false);
+    });
+    return () => { active = false; };
+  }, [storyId, chapterPage, chapterReloadKey, getChaptersByStory]);
 
   // Favorite Details
   const handleAddFavorite = async (storyId: string) => {
@@ -148,7 +205,7 @@ const StoryDetails = () => {
                     </span>
                     Comenzar
                   </button>
-                  { authUser && !isOwnStory && (
+                  { authUser && !isOwnStory && coauthorStatusLoaded && !isCoauthor && (
                       <button
                         onClick={() => !favorite ? handleAddFavorite(story.id) : handleRemoveFavorite(story.id)}
                         className="border border-outline-variant/30 bg-surface-container-low text-on-surface px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-surface-container-high transition-all cursor-pointer"
@@ -203,13 +260,23 @@ const StoryDetails = () => {
               
                 {/** Load more chapters */}
               <div className="grid gap-4">
-              { chapters && chapters.data.length > 0 ? (
+              {chaptersLoading ? (
+                <div className="flex items-center justify-center py-10"><div className="loading-button" /></div>
+              ) : chaptersError ? (
+                <div className="rounded-xl border border-red-400/20 bg-red-500/5 p-5 text-center">
+                  <p role="alert" className="text-sm text-red-300">{chaptersError}</p>
+                  <button type="button" onClick={() => setChapterReloadKey((current) => current + 1)} className="mt-3 cursor-pointer text-sm font-semibold text-high-enfasis hover:underline">
+                    Reintentar
+                  </button>
+                </div>
+              ) : chapters && chapters.data.length > 0 ? (
                 chapters.data.map(chapter => (
-                  <div
+                  <button
+                    type="button"
                     onClick={() => navigate("/read", {
-                      state: { chapterToRead: chapter }
+                      state: { chapterToRead: chapter, storyTitle: story.title, storyAuthor: story.username }
                     })}
-                    key={chapter.id} className="group flex items-start sm:items-center justify-between gap-3 p-4 sm:p-6 rounded-2xl bg-surface-container-low border border-transparent hover:border-primary/20 transition-all cursor-default min-w-0"
+                    key={chapter.id} className="group flex w-full cursor-pointer items-start justify-between gap-3 rounded-2xl border border-transparent bg-surface-container-low p-4 text-left transition-all hover:border-primary/20 sm:items-center sm:p-6"
                   >
                     <div className="flex items-start sm:items-center gap-3 sm:gap-6 min-w-0">
                       <span className="text-xl sm:text-2xl font-display font-black text-on-surface-variant/50 italic shrink-0">
@@ -220,25 +287,32 @@ const StoryDetails = () => {
                           {renderWithoutFormat(parseTiptapContent(chapter.title))}
                         </h4>
                         <p className="text-xs text-on-surface-variant">
-                          {chapter.hidden ? "Borrador" : "Publicado"} • Última Edición {chapter.updatedAt ? getLastModifiedTime(chapter.updatedAt) : "Nunca"} • {chapter.content ? countTotalWords(parseTiptapContent(chapter.content)) : 0} palabras
+                          Publicado • Última Edición {chapter.updatedAt ? getLastModifiedTime(chapter.updatedAt) : "Nunca"} • {chapter.content ? countTotalWords(parseTiptapContent(chapter.content)) : 0} palabras
                         </p>
                       </div>
                     </div>
-                  </div>
+                    <BookOpen className="mt-1 shrink-0 text-primary transition-transform group-hover:translate-x-1 sm:mt-0" size={20} />
+                  </button>
                 ))
               ) : (
-                !chapters ? (
-                  <h3 className="text-2xl text-center pt-6 font-bold">
-                    No has creado ningún capítulo
-                  </h3>
-                ) : (
-                  <div className="flex items-center justify-center w-full h-full">
-                    <div className="loading-button" />
-                  </div>
-                )
+                <p className="rounded-xl border border-dashed border-outline-variant/30 px-5 py-8 text-center text-on-surface-variant">
+                  Esta historia aún no tiene capítulos públicos.
+                </p>
               )}
             </div>
-
+            {chapters && chapters.meta.totalPages > 1 && (
+              <nav className="mt-6 flex items-center justify-between gap-3" aria-label="Paginación de capítulos">
+                <button type="button" disabled={chapterPage === 0 || chaptersLoading} onClick={() => setChapterPage((current) => Math.max(0, current - 1))}
+                  className="inline-flex cursor-pointer items-center gap-1 rounded-xl bg-surface-container-high px-3 py-2 text-sm text-on-surface transition hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-40 sm:px-4">
+                  <ChevronLeft size={18} /> Anterior
+                </button>
+                <span className="text-xs text-on-surface-variant sm:text-sm">Página {chapterPage + 1} de {chapters.meta.totalPages}</span>
+                <button type="button" disabled={chapterPage + 1 >= chapters.meta.totalPages || chaptersLoading} onClick={() => setChapterPage((current) => current + 1)}
+                  className="inline-flex cursor-pointer items-center gap-1 rounded-xl bg-surface-container-high px-3 py-2 text-sm text-on-surface transition hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-40 sm:px-4">
+                  Siguiente <ChevronRight size={18} />
+                </button>
+              </nav>
+            )}
 
               </section>
               {/** Comments */}

@@ -1,8 +1,10 @@
 import TextAlign from "@tiptap/extension-text-align";
 import { generateHTML, generateText, type JSONContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { TextStyleKit } from "@tiptap/extension-text-style";
 
 const extensions = [ 
+  TextStyleKit,
   StarterKit,
   TextAlign.configure({
     alignments: ['left', 'center', 'right', 'justify'],

@@ -338,9 +338,11 @@ const EditStory = () => {
                         </div>
                       )}
                     </div>
-                    <button type="button" onClick={() => setManageCoauthors(true)} className="flex shrink-0 cursor-pointer items-center justify-center gap-2 self-start rounded-xl border border-primary/30 bg-surface-container-low px-4 py-3 font-semibold text-on-surface transition hover:bg-primary/10 active:scale-95 sm:self-auto">
-                      <UsersRound size={18} /> Gestionar coautores
-                    </button>
+                    {story.userId === authUser?.userId && (
+                      <button type="button" onClick={() => setManageCoauthors(true)} className="flex shrink-0 cursor-pointer items-center justify-center gap-2 self-start rounded-xl border border-primary/30 bg-surface-container-low px-4 py-3 font-semibold text-on-surface transition hover:bg-primary/10 active:scale-95 sm:self-auto">
+                        <UsersRound size={18} /> Gestionar coautores
+                      </button>
+                    )}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 w-full max-w-3xl">
                     <button

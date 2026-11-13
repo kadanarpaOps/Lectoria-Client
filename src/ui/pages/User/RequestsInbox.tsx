@@ -54,8 +54,12 @@ export default function RequestsInbox() {
                     <h2 className="font-semibold text-global">
                       {request.type === "COAUTHOR_REQUEST"
                         ? request.coauthorUserId === request.sourceUserId
-                          ? `${request.sourceUsername ?? "Un usuario"} solicita ser coautor`
-                          : `${request.sourceUsername ?? "Un usuario"} te invita como coautor`
+                          ? incoming
+                            ? `${request.sourceUsername ?? "Un usuario"} solicita ser coautor`
+                            : "Solicitaste ser coautor"
+                          : incoming
+                            ? `${request.sourceUsername ?? "Un usuario"} te invita como coautor`
+                            : `${request.sourceUsername ?? "El autor"} ha invitado a ${request.coauthorUsername ?? request.targetUsername ?? "un usuario"} a ser coautor`
                         : "Solicitud de reactivación"}
                     </h2>
                     {request.storyId && <button type="button" onClick={() => navigate(`/explore/story/${request.storyId}`)} className="mt-1 cursor-pointer text-sm text-high-enfasis hover:underline">Abrir historia</button>}

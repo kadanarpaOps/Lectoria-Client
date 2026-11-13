@@ -4,7 +4,7 @@ import { useAuth } from "../../hooks/useAuth"
 import { useStories } from "../../hooks/useStories"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { StoryInfo } from "../../../core/domain/models/stories/StoryModel"
-import { getAppNotifications, getUnreadNotificationCount, type AppNotification } from "../../../infrastructure/api/requests/notifications.request"
+import { getAppNotifications, getUnreadNotificationCount, notificationReadStateChangedEvent, type AppNotification } from "../../../infrastructure/api/requests/notifications.request"
 
 type NavbarProps = {
     isSidebarOpen: boolean | null,
@@ -67,6 +67,11 @@ const Navbar = ({ isSidebarOpen, isMobile, toggleSidebar }: NavbarProps) => {
     const timer = window.setTimeout(() => { void refreshNotifications(); }, 0);
     return () => window.clearTimeout(timer);
   }, [refreshNotifications, location.pathname]);
+  useEffect(() => {
+    const handleNotificationReadStateChanged = () => { void refreshNotifications(); };
+    window.addEventListener(notificationReadStateChangedEvent, handleNotificationReadStateChanged);
+    return () => window.removeEventListener(notificationReadStateChangedEvent, handleNotificationReadStateChanged);
+  }, [refreshNotifications]);
 
   return (
     <header className={`${isSidebarOpen !== null ? 'sticky' : 'fixed'} top-0 z-40 w-full bg-background-global/80 backdrop-blur-sm px-3 sm:px-6 lg:px-8 py-3 sm:py-4`}>
@@ -141,7 +146,7 @@ const Navbar = ({ isSidebarOpen, isMobile, toggleSidebar }: NavbarProps) => {
                     </div>
                 </div>
             </div>
-            <div className="flex justify-end">
+            <div className="flex items-center justify-end gap-2">
                 {authUser && (
                     <>
                         <div className="relative">
@@ -154,7 +159,7 @@ const Navbar = ({ isSidebarOpen, isMobile, toggleSidebar }: NavbarProps) => {
                                 }}
                                 aria-label="Notificaciones"
                                 aria-expanded={notificationsOpen}
-                                className="relative ml-2 rounded-full p-2 text-global transition hover:bg-global/10 hover:text-high-enfasis active:scale-90 cursor-pointer"
+                                className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-global transition hover:bg-global/10 hover:text-high-enfasis active:scale-90"
                             >
                                 <Bell size={24} />
                                 {unreadCount > 0 && <span className="absolute -right-0.5 -top-0.5 min-w-5 rounded-full bg-high-enfasis px-1 text-center text-xs font-bold text-white">{unreadCount > 9 ? "9+" : unreadCount}</span>}
@@ -192,11 +197,14 @@ const Navbar = ({ isSidebarOpen, isMobile, toggleSidebar }: NavbarProps) => {
                                 </div>
                             )}
                         </div>
-                        <LogOut
-                            size={26}
-                            className="ml-4 md:ml-8 cursor-pointer hover:text-high-enfasis"
+                        <button
+                            type="button"
+                            aria-label="Cerrar sesión"
+                            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-global transition hover:bg-global/10 hover:text-high-enfasis active:scale-90"
                             onClick={() => {logout(); navigate("/auth")}}
-                        />
+                        >
+                            <LogOut size={24} />
+                        </button>
                     </>
                 )}
             </div>

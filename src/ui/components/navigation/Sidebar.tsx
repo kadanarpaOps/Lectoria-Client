@@ -1,4 +1,4 @@
-import { BookCopy, CircleUserRound, Compass, Inbox, Settings, SquarePen, UsersRound } from "lucide-react";
+import { BookCopy, CircleUserRound, Clock3, Compass, Inbox, Settings, SquarePen, UsersRound } from "lucide-react";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
@@ -51,7 +51,7 @@ const Sidebar = ({ isSidebarOpen, isMobile, onClose }: SidebarProps) => {
         <div className="text-3xl font-bold tracking-tighter text-high-enfasis mb-8">
           Lectoria
         </div>
-        <div className="flex-1 space-y-3">
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto custom-scrollbar">
           {!isAdmin && (
             <>
               <a className={navigationClass("/explore")} onClick={() => navigateTo("/explore")}>
@@ -82,6 +82,12 @@ const Sidebar = ({ isSidebarOpen, isMobile, onClose }: SidebarProps) => {
             <a className={navigationClass("/requests")} onClick={() => navigateTo("/requests")}>
               <Inbox size={25} />
               <span>Solicitudes</span>
+            </a>
+          )}
+          {authUser && !isAdmin && (
+            <a className={navigationClass("/reading-history")} onClick={() => navigateTo("/reading-history")}>
+              <Clock3 size={25} />
+              <span>Historial</span>
             </a>
           )}
           {isAdmin && (

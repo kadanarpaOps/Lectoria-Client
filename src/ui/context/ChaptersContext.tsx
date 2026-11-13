@@ -8,8 +8,8 @@ export interface ChaptersContextType {
   updating: boolean
   error: string | null;
   // Rest Methods
-  getChaptersByStory: (filters: ChaptersFilters, storyId: string) => Promise<PageResponse<ChapterInfo>>;
-  getOwnedChaptersByStory: (filters: ChaptersFilters, storyId: string) => Promise<PageResponse<ChapterInfo>>;
+  getChaptersByStory: (filters: ChaptersFilters, storyId: string) => Promise<PageResponse<ChapterInfo> | null>;
+  getOwnedChaptersByStory: (filters: ChaptersFilters, storyId: string) => Promise<PageResponse<ChapterInfo> | null>;
   createChapter: (createChapter: RegisterChapter) => Promise<boolean>;
   updateChapter: (updateChapter: UpdateChapter, chapterId: string) => Promise<boolean>;
   moveChapterOrder: (chapterId: string, order: number) => Promise<boolean>;
