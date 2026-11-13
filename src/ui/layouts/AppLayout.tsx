@@ -21,6 +21,7 @@ import RequestsInbox from "../pages/User/RequestsInbox";
 import ReadingHistory from "../pages/User/ReadingHistory";
 import AdminRequests from "../pages/Admin/AdminRequests";
 import RecoveryPassword from "../pages/Auth/RecoveryPassword";
+import HelpCenter from "../pages/HelpCenter";
 import { useAuth } from "../hooks/useAuth";
 import type { ReactNode } from "react";
 
@@ -47,6 +48,7 @@ export default function AppLayout() {
         <Route path="/recovery-pass" element={<RecoveryPassword />} />
         <Route path="/auth/verify-registration" element={<RegistrationVerification />} />
         <Route element={<MainLayout />}>
+          <Route path="/help" element={<HelpCenter />} />
           <Route path="/explore" element={<ExploreStories />} />
           <Route path="/explore/story/:storyId" element={<StoryDetails />} />
           <Route path="/read" element={<Read />} />

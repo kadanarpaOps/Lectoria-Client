@@ -1,7 +1,7 @@
 import { BookOpen, PenLine, Users } from 'lucide-react';
 import { Globe, Rss, Mail } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { useTheme } from '../../hooks/useTheme';
 import ThemeToggleButton from '../../components/theme/ThemeToggleButton';
 import type { AppTheme } from '../../hooks/useTheme';
@@ -510,6 +510,7 @@ function Footer() {
                     Tu tinta, tu historia, tu comunidad — © {new Date().getFullYear()}
                 </p>
                 <div className="flex items-center gap-5 text-several-light md:mr-14">
+                    <Link to="/help" className="text-sm transition-colors hover:text-high-enfasis">Centro de ayuda</Link>
                     <a href="#"><Globe size={16} /></a>
                     <a href="#"><Rss size={16} /></a>
                     <a href="#"><Mail size={16} /></a>

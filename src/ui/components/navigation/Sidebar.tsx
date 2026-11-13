@@ -1,4 +1,4 @@
-import { BookCopy, CircleUserRound, Clock3, Compass, Inbox, Settings, SquarePen, UsersRound } from "lucide-react";
+import { BookCopy, CircleHelp, CircleUserRound, Clock3, Compass, Inbox, Settings, SquarePen, UsersRound } from "lucide-react";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
@@ -68,6 +68,10 @@ const Sidebar = ({ isSidebarOpen, isMobile, onClose }: SidebarProps) => {
               </a>
             </>
           )}
+          <a className={navigationClass("/help")} onClick={() => navigateTo("/help")}>
+            <CircleHelp size={25} />
+            <span>Centro de ayuda</span>
+          </a>
           <a className={navigationClass("/profile")} onClick={() => navigateTo("/profile")}>
             <CircleUserRound size={26} />
             <span>Mi Cuenta</span>
