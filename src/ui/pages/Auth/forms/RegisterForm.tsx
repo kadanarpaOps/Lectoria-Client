@@ -5,10 +5,13 @@ import { useForm } from "react-hook-form";
 import type { RegisterUserRequest } from "../../../../core/domain/models/users/UserModel";
 import { registerSchema } from "../../../schemas/user.schema";
 import { useUsers } from "../../../hooks/useUsers";
+import { Eye, EyeClosed } from "lucide-react";
+import { useState } from "react";
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const RegisterForm = () => {
+  const [showPassword, setShowPassword] = useState(false);
   // Use Navigate
   const navigate = useNavigate();
   // Use Users
@@ -74,16 +77,25 @@ const RegisterForm = () => {
             <label className="text-xs font-semibold uppercase tracking-widest text-several-light ml-1">
               Contraseña
             </label>
-            <div className="relative group">
+            <div className="relative mt-2">
               <input
-                type="password"
-                className="w-full bg-inputs-bg/30 border-none rounded-xl py-4 px-5 text-global placeholder-several-light/40 focus:ring-2 focus:ring-high-enfasis transition-all outline-none focus:outline-none mt-2"
+                type={showPassword ? "text" : "password"}
+                className="w-full bg-inputs-bg/30 border-none rounded-xl py-4 pl-5 pr-12 text-global placeholder-several-light/40 focus:ring-2 focus:ring-high-enfasis transition-all outline-none focus:outline-none"
                 placeholder="Pon tu Clave"
                 autoComplete="off"
                 {...register("password")}
               />
-              {errors.password && <p>{errors.password.message}</p>}
+              <button
+                type="button"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                aria-pressed={showPassword}
+                onClick={() => setShowPassword((visible) => !visible)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-several-light transition-colors hover:text-high-enfasis focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-high-enfasis"
+              >
+                {showPassword ? <EyeClosed size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
+              </button>
             </div>
+            {errors.password && <p>{errors.password.message}</p>}
           </div>
           <button
             className={`w-full duration-300 ease-in-out transition-all mt-2 font-bold py-4 rounded-full ${!loading ? "bg-high-enfasis hover:bg-high-enfasis/90 text-on-primary font-semibold py-4 rounded-full transition-all duration-300 shadow-lg shadow-high-enfasis/20 hover:scale-[0.98] cursor-pointer" : "cursor-default"}`}
